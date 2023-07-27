@@ -45,7 +45,6 @@ namespace WebAPIBookStore.Data
                     .HasOne(u => u.User)
                     .WithMany(ci => ci.CartItems)
                     .HasForeignKey(u => u.UserId);
-
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using WebAPIBookStore.Data;
+using WebAPIBookStore.Models;
 
-namespace WebAPIBookStore.Models
+
+namespace WebBookStore
 {
     public class Seed
     {
@@ -55,3 +57,4 @@ namespace WebAPIBookStore.Models
         }
     }
 }
+

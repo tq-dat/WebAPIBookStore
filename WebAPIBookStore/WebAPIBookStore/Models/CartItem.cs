@@ -7,11 +7,16 @@ namespace WebAPIBookStore.Models;
 public class CartItem
 {
     public int Id { get; set; }
+
     public int QuantityOfProduct { get; set; }
+
     [MaxLength(10)]
     public string Status { get; set; }
+
     public int? OrderId { get; set; }
+
     public int ProductId { get; set; }
+
     public int UserId { get; set; }
 
     public Order? Order { get; set; }
