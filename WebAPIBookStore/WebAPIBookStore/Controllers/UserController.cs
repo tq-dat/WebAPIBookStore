@@ -25,54 +25,61 @@ namespace WebAPIBookStore.Controllers
         [HttpGet]
         public IActionResult GetUsers()
         {
-            var users = _mapper.Map<List<UserDto>>(_userRepository.GetUsers);
-            if (users.Count() <= 0)
+            var users = _userRepository.GetUsers;
+            if (users == null)
                 return NotFound();
 
+            var userDtos = _mapper.Map<List<UserDto>>(users);
             return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
         }
 
         [HttpGet("{role}")]
-        public IActionResult GetUsersByRole(string role)
+        public IActionResult GetUsersByRole([FromQuery] string role)
         {
-            var users = _mapper.Map<List<UserDto>>(_userRepository.GetUsersByRole(role));
-            if (users.Count() <= 0)
+            var users = _userRepository.GetUsersByRole(role);
+            if (users == null)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
+            var userMaps = _mapper.Map<List<UserDto>>(users);
+            if (userMaps.Count() <= 0)
+                return NotFound();
+
+            return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("{userId:int}")]
-        public IActionResult GetUserByUserId(int userId) 
+        [HttpGet("{id:int}")]
+        public IActionResult GetUserByUserId([FromQuery] int id) 
         {
-            if (!_userRepository.UserExists(userId)) 
+            var user = _userRepository.GetUser(id);
+            if (user == null) 
                 return NotFound();
 
-            var user = _mapper.Map<UserDto>(_userRepository.GetUser(userId));
-            return ModelState.IsValid ? Ok(user) : BadRequest(ModelState);
+            var userMap = _mapper.Map<UserDto>(user);
+            return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
         }
         [HttpGet("seachUser/{name}")]
-        public IActionResult GetUsersByName(string name)
+        public IActionResult GetUsersByName([FromQuery] string name)
         {
-            var users = _mapper.Map<List<UserDto>>(_userRepository.GetUsersByName(name));
+            var users = _userRepository.GetUsersByName(name);
             if (users.Count() <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
+            var userMaps = _mapper.Map<List<UserDto>>(users);
+            return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
         }
+        // dang fix (chuyen sang order va tra ve dung Order
+        //[HttpGet("order/{userId}")]
+        //public IActionResult GetOrderByUserId(int userId)
+        //{
+        //    if (!_userRepository.UserExists(userId))
+        //        return NotFound();
 
-        [HttpGet("order/{userId}")]
-        public IActionResult GetOrderByUserId(int userId)
-        {
-            if (!_userRepository.UserExists(userId))
-                return NotFound();
+        //    var orders = _mapper.Map<List<OrderDto>>(_userRepository.GetOrdersByUserId(userId));
+        //    if (orders.Count() <= 0)
+        //        return NotFound();
 
-            var orders = _mapper.Map<List<OrderDto>>(_userRepository.GetOrdersByUserId(userId));
-            if (orders.Count() <= 0)
-                return NotFound();
-
-            return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
-        }
+        //    return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
+        //}
 
         [HttpPost("Login")]
         public IActionResult Login(UserLogin userLogin)
@@ -125,10 +132,11 @@ namespace WebAPIBookStore.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            if (!_userRepository.UserExists(id))
+            var deleteUser = _userRepository.GetUser(id);
+            if (deleteUser == null)
                 return NotFound();
 
-            if (!_userRepository.DeleteUser(id))
+            if (!_userRepository.DeleteUser(deleteUser))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);

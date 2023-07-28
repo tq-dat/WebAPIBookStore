@@ -17,12 +17,17 @@ namespace WebAPIBookStore.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IOrderRepository _orderRepository;
+        private readonly ICartItemRepository _cartItemRepository;
         private readonly IMapper _mapper;
 
-        public OrderController(IOrderRepository orderRepository,IUserRepository userRepository, IMapper mapper)
+        public OrderController(IOrderRepository orderRepository,
+                               IUserRepository userRepository,
+                               ICartItemRepository cartItemRepository,
+                               IMapper mapper)
         {
             _userRepository = userRepository;
             _orderRepository = orderRepository;
+            _cartItemRepository = cartItemRepository;
             _mapper = mapper;
         }
 
@@ -37,7 +42,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{status}")]
-        public IActionResult GetOrderByStatus(string status)
+        public IActionResult GetOrderByStatus([FromQuery] string status)
         {
             var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrderByStatus(status));
             if (orders.Count() <= 0)
@@ -47,7 +52,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult GetOrder(int id)
+        public IActionResult GetOrder([FromQuery] int id)
         {
             if (!_orderRepository.OrderExists(id))
                 return NotFound();
@@ -57,17 +62,29 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateOrder(OrderCreate orderCreate)
+        public IActionResult CreateOrder([FromBody] OrderCreate orderCreate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cartItemIds = orderCreate.cartItemIds;
-            if (cartItemIds.Count <= 0)
+            if (orderCreate.cartItemIds.Count <= 0)
                 return BadRequest(ModelState);
 
+            List<CartItem> cartItems = new List<CartItem>();
+            foreach (int id in orderCreate.cartItemIds)
+            {
+                var cartItem = _cartItemRepository.GetCartItem(id);
+                if (cartItem == null)
+                    return NotFound();
+
+                if (cartItem.Status == "Paid")
+                    return BadRequest();
+
+                cartItems.Add(cartItem);
+            }
+
             var orderMap = _mapper.Map<Order>(orderCreate.orderDto);
-            if (!_orderRepository.CreateOrder(cartItemIds, orderMap))
+            if (!_orderRepository.CreateOrder(cartItems, orderMap))
             {
                 ModelState.AddModelError("", "Something went wrong");
                 return StatusCode(500, ModelState);
@@ -77,16 +94,20 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateOrder(int orderId, string status, int manageId)
+        public IActionResult UpdateOrder([FromQuery] int orderId, [FromQuery] string status, [FromQuery] int manageId)
         {
-            if (!_orderRepository.OrderExists(orderId))
+            var orderUpdate = _orderRepository.GetOrder(orderId);
+            if (orderUpdate == null)
                 return NotFound("Not found order");
 
             if (!_userRepository.ManageExists(manageId))
                 return NotFound("Not found manage");
 
-            return !_orderRepository.UpdateOrder(orderId, status, manageId) ? Ok("Successfully updated") : BadRequest();
+            if (status != "Cancel" || status != "Success")
+                return BadRequest("Status not true");
+
+            return !_orderRepository.UpdateOrder(orderUpdate, status, manageId) ? Ok("Successfully updated") : BadRequest();
         }
-        
+   
     }
 }

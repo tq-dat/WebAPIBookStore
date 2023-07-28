@@ -7,10 +7,11 @@ namespace WebAPIBookStore.Interfaces
     {
         public ICollection<Order> GetOrders();
         public ICollection<Order> GetOrderByStatus(string status);
-        public Order GetOrder(int id);
-        bool CreateOrder(List<int> cartItemIds, Order order);
-        bool UpdateOrder(int orderId, string status, int manageId);
-        bool Save();
-        bool OrderExists(int id);
+        public ICollection<Order> GetOrderByUserId(int userId);
+        public Order? GetOrder(int id);
+        public bool CreateOrder(List<CartItem> cartItems, Order order);
+        public bool UpdateOrder(Order orderUpdate, string status, int manageId);
+        public bool Save();
+        public bool OrderExists(int id);
     }
 }

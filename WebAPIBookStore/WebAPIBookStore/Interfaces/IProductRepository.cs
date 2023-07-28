@@ -5,13 +5,14 @@ namespace WebAPIBookStore.Interfaces
 {
     public interface IProductRepository
     {
-        ICollection<Product> GetProducts();
-        Product GetProduct(int id);
-        ICollection<Product> GetProductsByName(string name);
+        public ICollection<Product> GetProducts();
+        public Product? GetProduct(int id);
+        public ICollection<Product> GetProductsByName(string name);
+        public ICollection<Product?> GetProductsByCategory(int categoryId);
         public bool ProductExists(int prodId);
-        bool CreateProduct( int categoryId, Product product);
-        bool UpdateProduct( int productId, Product product);
-        bool DeleteProduct( int productId);
-        bool Save();
+        public bool CreateProduct(int categoryId, Product product);
+        public bool UpdateProduct(Product productUpdate, Product product);
+        public bool DeleteProduct(Product productDelete);
+        public bool Save();
     }
 }

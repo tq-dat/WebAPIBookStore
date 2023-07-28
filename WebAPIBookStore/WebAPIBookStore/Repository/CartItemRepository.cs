@@ -32,11 +32,20 @@ namespace WebAPIBookStore.Repository
             return Save();
         }
 
-        public bool DeleteCartItem(int id)
+        public bool DeleteCartItem(CartItem deleteCartItem)
         {
-            var deleteCartItem = _context.CartItems.FirstOrDefault(p => p.Id == id);
             _context.Remove(deleteCartItem);
             return Save();
+        }
+
+        public CartItem? GetCartItem(int id)
+        {
+            return _context.CartItems.FirstOrDefault(p => p.Id == id);
+        }
+
+        public ICollection<CartItem> GetCartItemByUserId(int userId)
+        {
+            return _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
         }
 
         public ICollection<CartItem> GetCartItemByOrderId(int orderId)
@@ -55,12 +64,11 @@ namespace WebAPIBookStore.Repository
             return saved > 0 ? true : false;
         }
 
-        public bool UpdateCartItem(CartItem cartItem, int id)
+        public bool UpdateCartItem(CartItem cartItem, CartItem cartItemUpdate)
         {
-            var cartUpdate = _context.CartItems.FirstOrDefault(p => p.Id == id);
-            cartUpdate.QuantityOfProduct = cartItem.QuantityOfProduct;
-            cartUpdate.Status = cartItem.Status;
-            _context.Update(cartUpdate);
+            cartItemUpdate.QuantityOfProduct = cartItem.QuantityOfProduct;
+            cartItemUpdate.Status = cartItem.Status;
+            _context.Update(cartItemUpdate);
             return Save();
         }
     }

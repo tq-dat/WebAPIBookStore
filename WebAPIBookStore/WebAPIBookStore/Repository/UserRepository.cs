@@ -20,14 +20,16 @@ namespace WebAPIBookStore.Repository
             return Save();
         }
 
-        public bool DeleteUser(int id)
+        public bool DeleteUser(User deleteUser)
         {
-            var deleteUser = _context.Users.FirstOrDefault(p => p.Id == id);
-            var deleteCartItemIds = _context.CartItems.Where(P => P.UserId == id && P.Status == "UnPaid").Select(p =>p.Id).ToList();
+            var deleteCartItemIds = _context.CartItems.Where(P => P.UserId == deleteUser.Id && P.Status == "UnPaid").Select(p =>p.Id).ToList();
             foreach (var cartItemId in deleteCartItemIds)
             {
                 var cartItem = _context.CartItems.FirstOrDefault(p => p.Id == cartItemId);
-                _context.Remove(cartItem);
+                if  (cartItem != null)
+                {
+                    _context.Remove(cartItem);
+                }
             }
 
             deleteUser.Role = "UserDeleted";
@@ -35,17 +37,7 @@ namespace WebAPIBookStore.Repository
             return Save();
         }
 
-        public ICollection<CartItem> GetCartItemByUserId(int userId)
-        {
-            return _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
-        }
-
-        public ICollection<Order> GetOrdersByUserId(int userId)
-        {
-            return _context.CartItems.Where(c => c.UserId == userId && c.Status == "Paid").Select(c => c.Order).ToList();
-        }
-
-        public User GetUser(int userId)
+        public User? GetUser(int userId)
         {
             return _context.Users.FirstOrDefault(u => u.Id == userId);
         }

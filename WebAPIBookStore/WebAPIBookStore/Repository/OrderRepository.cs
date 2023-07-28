@@ -1,4 +1,5 @@
-﻿using WebAPIBookStore.Data;
+﻿using MessagePack;
+using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -12,21 +13,21 @@ namespace WebAPIBookStore.Repository
             _context = context;
         }
 
-        public bool CreateOrder(List<int> cartItemIds, Order order)
+        public bool CreateOrder(List<CartItem> cartItems, Order order)
         {
-            foreach (int id in cartItemIds)
+            foreach (CartItem x in cartItems)
             {
-                var cartItem = _context.CartItems.FirstOrDefault(p => p.Id == id);
-                cartItem.Order = order;
-                cartItem.Status = "Paid";
-                _context.Update(cartItem);
+                x.Order = order;
+                x.Status = "Paid";
+                x.Status = "Wait";
+                _context.Update(x);
             }
 
             _context.Add(order);
             return Save();
         }
 
-        public Order GetOrder(int id)
+        public Order? GetOrder(int id)
         {
             return _context.Orders.FirstOrDefault(p => p.Id == id);
         }
@@ -35,6 +36,11 @@ namespace WebAPIBookStore.Repository
         {
             var orders = _context.Orders.Where(p => p.Status.Contains(status)).ToList();
             return orders;
+        }
+
+        public ICollection<Order> GetOrderByUserId(int userId)
+        {
+            throw new NotImplementedException();
         }
 
         public ICollection<Order> GetOrders()
@@ -53,10 +59,8 @@ namespace WebAPIBookStore.Repository
             return saved > 0 ? true : false;
         }
 
-        public bool UpdateOrder(int orderId, string status, int manageId)
+        public bool UpdateOrder(Order orderUpdate, string status, int manageId)
         {
-            var orderUpdate = _context.Orders.FirstOrDefault(p => p.Id == orderId);
-            var admin = _context.Users.FirstOrDefault(p => p.Id == manageId && (p.Role == "Manage" || p.Role == "Admin"));
             orderUpdate.Status = status;
             orderUpdate.UserAdminId = manageId;
             _context.Update(orderUpdate);

@@ -5,18 +5,16 @@ namespace WebAPIBookStore.Interfaces
 {
     public interface IUserRepository
     {
-        ICollection<User> GetUsers();
-        ICollection<User> GetUsersByRole(string role);
-        User GetUser(int userId);
-        ICollection<User> GetUsersByName(string name);
-        ICollection<CartItem> GetCartItemByUserId (int userId);
-        ICollection<Order> GetOrdersByUserId(int userId);
-        bool UserExists (UserLogin userLogin);
-        bool UserExists(int userId);
-        bool ManageExists(int manageId);
-        bool CreateUser(User user);
-        bool UpdateUser(User user);
-        bool DeleteUser(int id);
-        bool Save();
+        public ICollection<User> GetUsers();
+        public ICollection<User> GetUsersByRole(string role);
+        public User? GetUser(int userId);
+        public ICollection<User> GetUsersByName(string name);
+        public bool UserExists (UserLogin userLogin);
+        public bool UserExists(int userId);
+        public bool ManageExists(int manageId);
+        public bool CreateUser(User user);
+        public bool UpdateUser(User user);
+        public bool DeleteUser(User deleteUser);
+        public bool Save();
     }
 }

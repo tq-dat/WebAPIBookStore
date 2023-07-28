@@ -13,7 +13,7 @@ namespace WebAPIBookStore.Repository
         {
             _context = context;
         }
-        public Product GetProduct(int id)
+        public Product? GetProduct(int id)
         {
             return _context.Products.FirstOrDefault(p => p.Id == id);
         }
@@ -53,9 +53,8 @@ namespace WebAPIBookStore.Repository
             return saved > 0 ? true : false;
         }
 
-        public bool UpdateProduct(int productId, Product product)
+        public bool UpdateProduct(Product productUpdate, Product product)
         {
-            var productUpdate = _context.Products.FirstOrDefault(p => p.Id == productId);
             productUpdate.Name = product.Name;
             productUpdate.Description = product.Description;
             productUpdate.Author = product.Author;
@@ -64,23 +63,27 @@ namespace WebAPIBookStore.Repository
             return Save();
         }
 
-        public bool DeleteProduct(int productId)
+        public bool DeleteProduct(Product productDelete)
         {
-            var deleteUpdate = _context.Products.Where(p => p.Id == productId).FirstOrDefault();
-            var productcategories = _context.ProductCategories.Where(p => p.ProductId == productId).ToList();
+            var productcategories = _context.ProductCategories.Where(p => p.ProductId == productDelete.Id).ToList();
             foreach (var pc in productcategories)
             {
                 _context.Remove(pc);
             }
 
-            var cartItems = _context.CartItems.Where(p => p.ProductId == productId && p.Status == "UnPaid").ToList();
+            var cartItems = _context.CartItems.Where(p => p.ProductId == productDelete.Id && p.Status == "UnPaid").ToList();
             foreach (var cartItem in cartItems)
             {
                 _context.Remove(cartItem);
             }
 
-            _context.Remove(deleteUpdate);
-            return Save();
+            _context.Remove(productDelete);
+            return Save();  
+        }
+
+        public ICollection<Product?> GetProductsByCategory(int categoryId)
+        {
+            return _context.ProductCategories.Where(pc => pc.CategoryId == categoryId).Select(p => p.Product).ToList();
         }
     }
 }

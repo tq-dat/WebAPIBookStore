@@ -32,18 +32,18 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(categories) : BadRequest(ModelState);
         }
 
-        [HttpGet("{Id}")]
-        public IActionResult GetCategory(int categoryId)
+        [HttpGet("{id}")]
+        public IActionResult GetCategory([FromQuery] int id)
         {
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CategoryExists(id))
                 return NotFound("Not found category");
 
-            var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(categoryId));
+            var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(id));
             return ModelState.IsValid ? Ok(category) : BadRequest(ModelState);
         }
 
         [HttpPost]
-        public IActionResult CreateCategory(CategoryDto categoryDto)
+        public IActionResult CreateCategory([FromBody] CategoryDto categoryDto)
         {
             if (categoryDto == null)
                 return BadRequest(ModelState);
@@ -66,12 +66,13 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateCategory(int id, string name)
+        public IActionResult UpdateCategory([FromQuery] int id,[FromQuery] string name)
         {
-            if (!_categoryRepository.CategoryExists(id))
+            var category = _categoryRepository.GetCategory(id);
+            if (category == null)
                 return NotFound("Not founf category");
 
-            if (!_categoryRepository.UpdateCategory(id, name))
+            if (!_categoryRepository.UpdateCategory(category,name))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -81,12 +82,13 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        public IActionResult DeleteCategory([FromQuery] int id)
         {
-            if (!_categoryRepository.CategoryExists(id))
+            var deleteCategory = _categoryRepository.GetCategory(id);
+            if (deleteCategory == null)
                 return NotFound("Not founf category");
 
-            if (!_categoryRepository.DeleteCategory(id))
+            if (!_categoryRepository.DeleteCategory(deleteCategory))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);

@@ -4,13 +4,12 @@ namespace WebAPIBookStore.Interfaces
 {
     public interface ICategoryRepository
     {
-        ICollection<Category> GetCategories();
-        Category GetCategory(int id);
-        ICollection<Product> GetProductsByCategory(int categoryId);
-        bool UpdateCategory(int categoryId, string Name);
-        bool DeleteCategory(int id);
-        bool CategoryExists(int id);
-        bool CreateCategory(Category category);
-        bool Save();
+        public ICollection<Category> GetCategories();
+        public Category? GetCategory(int id);
+        public bool UpdateCategory(Category category, string Name);
+        public bool DeleteCategory(Category deleteCategory);
+        public bool CategoryExists(int id);
+        public bool CreateCategory(Category category);
+        public bool Save();
     }
 }

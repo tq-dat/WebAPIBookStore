@@ -16,7 +16,9 @@ namespace WebAPIBookStore.Controllers
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public ProductController( IProductRepository productRepository,ICategoryRepository categoryRepository, IMapper mapper) 
+        public ProductController(IProductRepository productRepository,
+                                 ICategoryRepository categoryRepository,
+                                 IMapper mapper) 
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
@@ -26,48 +28,52 @@ namespace WebAPIBookStore.Controllers
         [HttpGet]
         public IActionResult GetProducts()
         {
-            var products = _mapper.Map<List<ProductDto>>(_productRepository.GetProducts());
+            var products = _productRepository.GetProducts();
             if (products.Count() <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(products) : BadRequest(ModelState);
+            var productMaps = _mapper.Map<List<ProductDto>>(products);
+            return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("{prodId:int}")]
-        public IActionResult GetProduct(int prodId)
+        [HttpGet("{id:int}")]
+        public IActionResult GetProduct([FromQuery] int id)
         {
-            if (!_productRepository.ProductExists(prodId))
+            var product = _productRepository.GetProduct(id);
+            if (product == null)
                 return NotFound();
 
-            var product = _mapper.Map<ProductDto>(_productRepository.GetProduct(prodId));
-            return ModelState.IsValid ? Ok(product) : BadRequest(ModelState);
+            var productMap = _mapper.Map<ProductDto>(product);
+            return ModelState.IsValid ? Ok(productMap) : BadRequest(ModelState);
         }
 
         [HttpGet("category/{categoryId}")]
-        public IActionResult GetProductsByCategoryId(int categoryId)
+        public IActionResult GetProductsByCategoryId([FromQuery] int categoryId)
         {
             if (!_categoryRepository.CategoryExists(categoryId))
                 return NotFound("Not found category");
 
-            var products = _mapper.Map<List<ProductDto>>(_categoryRepository.GetProductsByCategory(categoryId));
+            var products = _productRepository.GetProductsByCategory(categoryId);
             if (products.Count() <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(products) : BadRequest(ModelState);
+            var productMaps = _mapper.Map<List<ProductDto>>(products);
+            return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
 
         [HttpGet("{name}")]
-        public IActionResult GetProduct(string name)
+        public IActionResult GetProduct([FromQuery] string name)
         {
-            var products = _mapper.Map<List<ProductDto>>(_productRepository.GetProductsByName(name));
-            if (products.Count() <= 0) 
+            var products = _productRepository.GetProductsByName(name);
+            if (products.Count() <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(products) : BadRequest(ModelState);
+            var productMaps = _mapper.Map<List<ProductDto>>(products);
+            return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
 
         [HttpPost]
-        public IActionResult CreateProduct(int categoryId, ProductDto productCreate)
+        public IActionResult CreateProduct([FromQuery] int categoryId,[FromBody] ProductDto productCreate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -98,11 +104,12 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (_productRepository.ProductExists(prodId))
+            var productUpdate = _productRepository.GetProduct(prodId);
+            if (productUpdate == null)
                 return NotFound("Not found product");
 
             var productMap = _mapper.Map<Product>(product);
-            if (!_productRepository.UpdateProduct(prodId, productMap))
+            if (!_productRepository.UpdateProduct(productUpdate, productMap))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -112,12 +119,13 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteProduct(int prodId)
+        public IActionResult DeleteProduct([FromQuery] int id)
         {
-            if (_productRepository.ProductExists(prodId))
+            var product = _productRepository.GetProduct(id);
+            if (product == null)
                 return NotFound("Not found product");
 
-            if (!_productRepository.DeleteProduct(prodId))
+            if (!_productRepository.DeleteProduct(product))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);

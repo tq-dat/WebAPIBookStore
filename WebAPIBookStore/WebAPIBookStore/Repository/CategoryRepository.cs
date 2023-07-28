@@ -25,10 +25,9 @@ namespace WebAPIBookStore.Repository
             return Save();
         }
 
-        public bool DeleteCategory(int id)
+        public bool DeleteCategory(Category deleteCategory)
         {
-            var deleteCategory = _context.Categories.FirstOrDefault(p => p.Id == id);
-            var productcategories = _context.ProductCategories.Where(p => p.CategoryId == id).ToList();
+            var productcategories = _context.ProductCategories.Where(p => p.CategoryId == deleteCategory.Id).ToList();
             foreach(var pc in productcategories) 
             {
                 _context.Remove(pc);
@@ -43,14 +42,9 @@ namespace WebAPIBookStore.Repository
             return _context.Categories.OrderBy(c => c.Id).ToList();
         }
 
-        public Category GetCategory(int id)
+        public Category? GetCategory(int id)
         {
             return _context.Categories.FirstOrDefault(c => c.Id == id);
-        }
-
-        public ICollection<Product> GetProductsByCategory(int categoryId)
-        {
-            return _context.ProductCategories.Where(pc => pc.CategoryId == categoryId).Select(p => p.Product).ToList();
         }
 
         public bool Save()
@@ -59,11 +53,10 @@ namespace WebAPIBookStore.Repository
             return saved > 0 ? true : false;
         }
 
-        public bool UpdateCategory(int categoryId, string Name)
+        public bool UpdateCategory(Category category, string Name)
         {
-            var updateCategory = _context.Categories.FirstOrDefault(p => p.Id == categoryId);
-            updateCategory.Name = Name;
-            _context.Update(updateCategory);
+            category.Name = Name;
+            _context.Update(category);
             return Save();
         }
     }
