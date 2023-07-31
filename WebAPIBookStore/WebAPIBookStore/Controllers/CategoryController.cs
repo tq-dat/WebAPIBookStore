@@ -32,7 +32,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(categories) : BadRequest(ModelState);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id")]
         public IActionResult GetCategory([FromQuery] int id)
         {
             if (!_categoryRepository.CategoryExists(id))
@@ -81,7 +81,7 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id")]
         public IActionResult DeleteCategory([FromQuery] int id)
         {
             var deleteCategory = _categoryRepository.GetCategory(id);

@@ -41,7 +41,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid? Ok(orders) : BadRequest(ModelState);
         }
 
-        [HttpGet("{status}")]
+        [HttpGet("status")]
         public IActionResult GetOrderByStatus([FromQuery] string status)
         {
             var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrderByStatus(status));
@@ -51,24 +51,37 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("id")]
         public IActionResult GetOrder([FromQuery] int id)
         {
-            if (!_orderRepository.OrderExists(id))
+            var order = _orderRepository.GetOrder(id);
+            if (order == null)
                 return NotFound();
 
-            var order = _mapper.Map<Order>(_orderRepository.GetOrder(id));
             return ModelState.IsValid ? Ok(order) : BadRequest(ModelState);
         }
 
+        [HttpGet("user/userId")]
+        public IActionResult GetOrderByUserId([FromQuery] int userId)
+        {
+            var orders = _orderRepository.GetOrderByUserId(userId);
+            if (orders.Count() <= 0)
+                return NotFound();
+
+            return Ok(orders);
+        }
+
         [HttpPost]
-        public IActionResult CreateOrder([FromBody] OrderCreate orderCreate)
+        public IActionResult CreateOrder([FromBody] OrderCreate orderCreate, [FromQuery] int userId)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             if (orderCreate.cartItemIds.Count <= 0)
                 return BadRequest(ModelState);
+
+            if (!_userRepository.UserExists(userId))
+                return NotFound("Not found user");
 
             List<CartItem> cartItems = new List<CartItem>();
             foreach (int id in orderCreate.cartItemIds)
@@ -84,7 +97,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var orderMap = _mapper.Map<Order>(orderCreate.orderDto);
-            if (!_orderRepository.CreateOrder(cartItems, orderMap))
+            if (!_orderRepository.CreateOrder(cartItems, orderMap, userId))
             {
                 ModelState.AddModelError("", "Something went wrong");
                 return StatusCode(500, ModelState);

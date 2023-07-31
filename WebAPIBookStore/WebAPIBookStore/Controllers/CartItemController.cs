@@ -39,34 +39,28 @@ namespace WebAPIBookStore.Controllers
             if (cartItems.Count() <= 0)
                 return NotFound();
 
-            var cartItemMaps = _mapper.Map<List<CartItem>>(cartItems);
+            var cartItemMaps = _mapper.Map<List<CartItemDto>>(cartItems);
             return ModelState.IsValid ? Ok(cartItemMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("Order/{orderId}")]
+        [HttpGet("Order/orderId")]
         public IActionResult GetCartItemByOrderId([FromQuery] int orderId)
         {
             if (!_orderRepository.OrderExists(orderId))
                 return NotFound("Not found order");
 
             var cartItems = _cartItemRepository.GetCartItemByOrderId(orderId);
-            if (cartItems.Count() <= 0)
-                return BadRequest();
-
             return ModelState.IsValid ? Ok(cartItems) : BadRequest(ModelState);
         }
 
-        [HttpGet("User/{userId}")]
+        [HttpGet("User/userId")]
         public IActionResult GetCartItemByUserId([FromQuery] int userId)
         {
             if (!_userRepository.UserExists(userId))
                 return NotFound("Not found user");
-            var cartItems = _cartItemRepository.GetCartItemByUserId(userId);
-            if (cartItems.Count() <= 0)
-                return NotFound();
 
-            var cartItemMaps = _mapper.Map<List<CartItemDto>>(cartItems);
-            return ModelState.IsValid ? Ok(cartItemMaps) : BadRequest(ModelState);
+            var cartItems = _cartItemRepository.GetCartItemByUserId(userId);
+            return ModelState.IsValid ? Ok(cartItems) : BadRequest(ModelState);
         }
 
         [HttpPost]
@@ -111,7 +105,7 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id")]
         public IActionResult DeleteCartItem([FromQuery] int id)
         {
             var deleteCartItem = _cartItemRepository.GetCartItem(id);

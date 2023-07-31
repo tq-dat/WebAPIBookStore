@@ -22,18 +22,18 @@ namespace WebAPIBookStore.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public IActionResult GetUsers()
-        {
-            var users = _userRepository.GetUsers;
-            if (users == null)
-                return NotFound();
+        //[HttpGet]
+        //public IActionResult GetUsers()
+        //{
+        //    var users = _userRepository.GetUsers;
+        //    if (users == null)
+        //        return NotFound();
 
-            var userDtos = _mapper.Map<List<UserDto>>(users);
-            return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
-        }
+        //    var userMaps = _mapper.Map<List<UserDto>>(users);
+        //    return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
+        //}
 
-        [HttpGet("{role}")]
+        [HttpGet("role")]
         public IActionResult GetUsersByRole([FromQuery] string role)
         {
             var users = _userRepository.GetUsersByRole(role);
@@ -47,7 +47,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("id")]
         public IActionResult GetUserByUserId([FromQuery] int id) 
         {
             var user = _userRepository.GetUser(id);
@@ -57,7 +57,7 @@ namespace WebAPIBookStore.Controllers
             var userMap = _mapper.Map<UserDto>(user);
             return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
         }
-        [HttpGet("seachUser/{name}")]
+        [HttpGet("seachUser/name")]
         public IActionResult GetUsersByName([FromQuery] string name)
         {
             var users = _userRepository.GetUsersByName(name);
@@ -67,19 +67,6 @@ namespace WebAPIBookStore.Controllers
             var userMaps = _mapper.Map<List<UserDto>>(users);
             return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
         }
-        // dang fix (chuyen sang order va tra ve dung Order
-        //[HttpGet("order/{userId}")]
-        //public IActionResult GetOrderByUserId(int userId)
-        //{
-        //    if (!_userRepository.UserExists(userId))
-        //        return NotFound();
-
-        //    var orders = _mapper.Map<List<OrderDto>>(_userRepository.GetOrdersByUserId(userId));
-        //    if (orders.Count() <= 0)
-        //        return NotFound();
-
-        //    return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
-        //}
 
         [HttpPost("Login")]
         public IActionResult Login(UserLogin userLogin)
@@ -129,7 +116,7 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id")]
         public IActionResult DeleteUser(int id)
         {
             var deleteUser = _userRepository.GetUser(id);

@@ -2,6 +2,7 @@
 using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using ZstdSharp.Unsafe;
 
 namespace WebAPIBookStore.Repository
 {
@@ -13,7 +14,7 @@ namespace WebAPIBookStore.Repository
             _context = context;
         }
 
-        public bool CreateOrder(List<CartItem> cartItems, Order order)
+        public bool CreateOrder(List<CartItem> cartItems, Order order, int userId)
         {
             foreach (CartItem x in cartItems)
             {
@@ -23,13 +24,14 @@ namespace WebAPIBookStore.Repository
                 _context.Update(x);
             }
 
+            order.UserId = userId;
             _context.Add(order);
             return Save();
         }
 
         public Order? GetOrder(int id)
         {
-            return _context.Orders.FirstOrDefault(p => p.Id == id);
+           return _context.Orders.FirstOrDefault(p => p.Id == id);
         }
 
         public ICollection<Order> GetOrderByStatus(string status)
@@ -40,7 +42,7 @@ namespace WebAPIBookStore.Repository
 
         public ICollection<Order> GetOrderByUserId(int userId)
         {
-            throw new NotImplementedException();
+            return _context.Orders.Where(p => p.UserId == userId).ToList();
         }
 
         public ICollection<Order> GetOrders()

@@ -36,7 +36,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("id")]
         public IActionResult GetProduct([FromQuery] int id)
         {
             var product = _productRepository.GetProduct(id);
@@ -47,7 +47,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMap) : BadRequest(ModelState);
         }
 
-        [HttpGet("category/{categoryId}")]
+        [HttpGet("Category/categoryId")]
         public IActionResult GetProductsByCategoryId([FromQuery] int categoryId)
         {
             if (!_categoryRepository.CategoryExists(categoryId))
@@ -61,7 +61,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("name")]
         public IActionResult GetProduct([FromQuery] string name)
         {
             var products = _productRepository.GetProductsByName(name);
@@ -118,7 +118,7 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id")]
         public IActionResult DeleteProduct([FromQuery] int id)
         {
             var product = _productRepository.GetProduct(id);

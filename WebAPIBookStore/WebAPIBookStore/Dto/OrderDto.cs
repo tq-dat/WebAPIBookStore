@@ -12,6 +12,6 @@ namespace WebAPIBookStore.Dto
         public int? UserAdminId { get; set; }
 
         [MaxLength(10)]
-        public string Status { get; set; }
+        public string Status { get; set; } = null!;
     }
 }

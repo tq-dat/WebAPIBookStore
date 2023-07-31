@@ -10,10 +10,14 @@ public class Order
 
     public DateTime DateOrder { get; set; }
 
+    public int UserId { get; set; }
+
     public int? UserAdminId { get; set; }
 
     [MaxLength(10)]
-    public string Status { get; set; }
+    public string Status { get; set; } = null!;
 
-    public ICollection<CartItem> CartItems { get; set; }
+    public User User { get; set; } = null!;
+
+    public ICollection<CartItem>? CartItems { get; set; }
 }

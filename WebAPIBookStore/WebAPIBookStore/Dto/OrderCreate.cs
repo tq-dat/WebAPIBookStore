@@ -2,8 +2,8 @@
 {
     public class OrderCreate
     {
-        public OrderDto orderDto { get; set; }
+        public OrderDto orderDto { get; set; } = null!;
 
-        public List<int> cartItemIds { get; set; }
+        public List<int> cartItemIds { get; set; } = null!;
     }
 }

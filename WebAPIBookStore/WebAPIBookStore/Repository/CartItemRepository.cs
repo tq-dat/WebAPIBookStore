@@ -43,14 +43,32 @@ namespace WebAPIBookStore.Repository
             return _context.CartItems.FirstOrDefault(p => p.Id == id);
         }
 
-        public ICollection<CartItem> GetCartItemByUserId(int userId)
+        public Object GetCartItemByUserId(int userId)
         {
-            return _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
+            var cartItems = _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
+            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => {
+                return new {
+                    p.Name,
+                    c.QuantityOfProduct,
+                    p.Price
+                };
+            });
+
+            return kq;
         }
 
-        public ICollection<CartItem> GetCartItemByOrderId(int orderId)
+        public Object GetCartItemByOrderId(int orderId)
         {
-            return _context.CartItems.Where(p => p.OrderId == orderId).ToList();
+            var cartItems = _context.CartItems.Where(c => c.OrderId == orderId && c.Status == "Paid").ToList();
+            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => {
+                return new {
+                    p.Name,
+                    c.QuantityOfProduct,
+                    p.Price
+                };
+            });
+
+            return kq;
         }
 
         public ICollection<CartItem> GetCartItems()

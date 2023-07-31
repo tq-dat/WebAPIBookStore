@@ -11,7 +11,7 @@ public class CartItem
     public int QuantityOfProduct { get; set; }
 
     [MaxLength(10)]
-    public string Status { get; set; }
+    public string Status { get; set; } = null!;
 
     public int? OrderId { get; set; }
 
@@ -21,7 +21,7 @@ public class CartItem
 
     public Order? Order { get; set; }
 
-    public Product Product { get; set; }
+    public Product? Product { get; set; }
 
-    public User User { get; set; }
+    public User? User { get; set; }
 }
