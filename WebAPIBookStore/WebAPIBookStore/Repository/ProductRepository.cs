@@ -1,7 +1,6 @@
 ﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using ZstdSharp.Unsafe;
 
 namespace WebAPIBookStore.Repository
 {
@@ -25,7 +24,7 @@ namespace WebAPIBookStore.Repository
 
         public ICollection<Product> GetProducts()
         {
-            return _context.Products.OrderBy(p => p.Id).ToList();
+            return _context.Products.Where(p => p.Name != "Deleted").ToList();
         }
 
         public bool ProductExists(int prodId)
@@ -50,7 +49,9 @@ namespace WebAPIBookStore.Repository
         public bool Save()
         {
             var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            if (saved > 0)
+                return true;
+            return false;
         }
 
         public bool UpdateProduct(Product productUpdate, Product product)
@@ -65,8 +66,8 @@ namespace WebAPIBookStore.Repository
 
         public bool DeleteProduct(Product productDelete)
         {
-            var productcategories = _context.ProductCategories.Where(p => p.ProductId == productDelete.Id).ToList();
-            foreach (var pc in productcategories)
+            var productCategories = _context.ProductCategories.Where(p => p.ProductId == productDelete.Id).ToList();
+            foreach (var pc in productCategories)
             {
                 _context.Remove(pc);
             }
@@ -77,7 +78,8 @@ namespace WebAPIBookStore.Repository
                 _context.Remove(cartItem);
             }
 
-            _context.Remove(productDelete);
+            productDelete.Name = "Deleted";
+            _context.Update(productDelete);
             return Save();  
         }
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace WebAPIBookStore.Models;
+﻿namespace WebAPIBookStore.Models;
 
 public class ProductCategory
 {

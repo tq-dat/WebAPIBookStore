@@ -22,7 +22,7 @@ namespace WebAPIBookStore.Repository
 
         public bool DeleteUser(User deleteUser)
         {
-            var deleteCartItemIds = _context.CartItems.Where(P => P.UserId == deleteUser.Id && P.Status == "UnPaid").Select(p =>p.Id).ToList();
+            var deleteCartItemIds = _context.CartItems.Where(p => p.UserId == deleteUser.Id && p.Status == "UnPaid").Select(p =>p.Id).ToList();
             foreach (var cartItemId in deleteCartItemIds)
             {
                 var cartItem = _context.CartItems.FirstOrDefault(p => p.Id == cartItemId);
@@ -32,7 +32,8 @@ namespace WebAPIBookStore.Repository
                 }
             }
 
-            deleteUser.Role = "UserDeleted";
+            deleteUser.UserName = "Deleted";
+            deleteUser.Role = "Deleted";
             _context.Update(deleteUser);    
             return Save();
         }
@@ -65,7 +66,9 @@ namespace WebAPIBookStore.Repository
         public bool Save()
         {
             var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            if (saved > 0)
+                return true;
+            return false;
         }
 
         public bool UpdateUser(User user)

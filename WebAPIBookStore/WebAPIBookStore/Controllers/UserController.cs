@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using WebAPIBookStore.Repository;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -37,11 +34,11 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetUsersByRole([FromQuery] string role)
         {
             var users = _userRepository.GetUsersByRole(role);
-            if (users == null)
+            if (users.Count <= 0)
                 return NotFound();
 
             var userMaps = _mapper.Map<List<UserDto>>(users);
-            if (userMaps.Count() <= 0)
+            if (userMaps.Count <= 0)
                 return NotFound();
 
             return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
@@ -57,11 +54,11 @@ namespace WebAPIBookStore.Controllers
             var userMap = _mapper.Map<UserDto>(user);
             return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
         }
-        [HttpGet("seachUser/name")]
+        [HttpGet("searchUser/name")]
         public IActionResult GetUsersByName([FromQuery] string name)
         {
             var users = _userRepository.GetUsersByName(name);
-            if (users.Count() <= 0)
+            if (users.Count <= 0)
                 return NotFound();
 
             var userMaps = _mapper.Map<List<UserDto>>(users);
@@ -83,10 +80,10 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == userCreate.UserName.Trim().ToUpper());
+            var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == userCreate.UserName.Trim().ToUpper() || c.Email == userCreate.Email);
             if (user != null)
             {
-                ModelState.AddModelError("", "User already exists");
+                ModelState.AddModelError("", "Username or email already exists");
                 return StatusCode(422, ModelState);
             }
 
@@ -101,7 +98,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult updateUser(UserDto userUpdate) 
+        public IActionResult UpdateUser(UserDto userUpdate) 
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

@@ -1,13 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Build.ObjectModelRemoting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using WebAPIBookStore.Repository;
-using static NuGet.Packaging.PackagingConstants;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -35,7 +30,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetOrders()
         {
             var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrders());
-            if (orders.Count() <= 0)
+            if (orders.Count <= 0)
                 return NotFound();
 
             return ModelState.IsValid? Ok(orders) : BadRequest(ModelState);
@@ -45,7 +40,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetOrderByStatus([FromQuery] string status)
         {
             var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrderByStatus(status));
-            if (orders.Count() <= 0)
+            if (orders.Count <= 0)
                 return NotFound();
 
             return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
@@ -65,7 +60,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetOrderByUserId([FromQuery] int userId)
         {
             var orders = _orderRepository.GetOrderByUserId(userId);
-            if (orders.Count() <= 0)
+            if (orders.Count <= 0)
                 return NotFound();
 
             return Ok(orders);
@@ -77,14 +72,14 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (orderCreate.cartItemIds.Count <= 0)
+            if (orderCreate.CartItemIds.Count <= 0)
                 return BadRequest(ModelState);
 
             if (!_userRepository.UserExists(userId))
                 return NotFound("Not found user");
 
             List<CartItem> cartItems = new List<CartItem>();
-            foreach (int id in orderCreate.cartItemIds)
+            foreach (int id in orderCreate.CartItemIds)
             {
                 var cartItem = _cartItemRepository.GetCartItem(id);
                 if (cartItem == null)
@@ -96,7 +91,7 @@ namespace WebAPIBookStore.Controllers
                 cartItems.Add(cartItem);
             }
 
-            var orderMap = _mapper.Map<Order>(orderCreate.orderDto);
+            var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
             if (!_orderRepository.CreateOrder(cartItems, orderMap, userId))
             {
                 ModelState.AddModelError("", "Something went wrong");

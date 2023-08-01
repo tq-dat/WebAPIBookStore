@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WebAPIBookStore.Models;
+﻿using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Interfaces
 {

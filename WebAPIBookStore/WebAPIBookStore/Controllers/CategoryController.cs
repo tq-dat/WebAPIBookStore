@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using WebAPIBookStore.Repository;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -23,10 +20,10 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet]
-        public IActionResult Getcategories()
+        public IActionResult GetCategories()
         {
             var categories = _mapper.Map<List<CategoryDto>>(_categoryRepository.GetCategories());
-            if (categories.Count() <= 0)
+            if (categories.Count <= 0)
                 return NotFound();
 
             return ModelState.IsValid ? Ok(categories) : BadRequest(ModelState);
@@ -45,7 +42,7 @@ namespace WebAPIBookStore.Controllers
         [HttpPost]
         public IActionResult CreateCategory([FromBody] CategoryDto categoryDto)
         {
-            if (categoryDto == null)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var category = _categoryRepository.GetCategories().FirstOrDefault(c => c.Name.Trim().ToUpper() == categoryDto.Name.Trim().ToUpper());
@@ -70,7 +67,7 @@ namespace WebAPIBookStore.Controllers
         {
             var category = _categoryRepository.GetCategory(id);
             if (category == null)
-                return NotFound("Not founf category");
+                return NotFound("Not found category");
 
             if (!_categoryRepository.UpdateCategory(category,name))
             {
@@ -86,7 +83,7 @@ namespace WebAPIBookStore.Controllers
         {
             var deleteCategory = _categoryRepository.GetCategory(id);
             if (deleteCategory == null)
-                return NotFound("Not founf category");
+                return NotFound("Not found category");
 
             if (!_categoryRepository.DeleteCategory(deleteCategory))
             {

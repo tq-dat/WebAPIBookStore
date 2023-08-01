@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WebAPIBookStore.Data;
+﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using ZstdSharp.Unsafe;
 
 namespace WebAPIBookStore.Repository
 {
@@ -34,6 +32,9 @@ namespace WebAPIBookStore.Repository
 
         public bool DeleteCartItem(CartItem deleteCartItem)
         {
+            if (deleteCartItem.Status == "Paid")
+                return false;
+
             _context.Remove(deleteCartItem);
             return Save();
         }
@@ -46,12 +47,11 @@ namespace WebAPIBookStore.Repository
         public Object GetCartItemByUserId(int userId)
         {
             var cartItems = _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
-            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => {
-                return new {
-                    p.Name,
-                    c.QuantityOfProduct,
-                    p.Price
-                };
+            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
+                new {
+                p.Name,
+                c.QuantityOfProduct,
+                p.Price
             });
 
             return kq;
@@ -60,12 +60,11 @@ namespace WebAPIBookStore.Repository
         public Object GetCartItemByOrderId(int orderId)
         {
             var cartItems = _context.CartItems.Where(c => c.OrderId == orderId && c.Status == "Paid").ToList();
-            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => {
-                return new {
-                    p.Name,
-                    c.QuantityOfProduct,
-                    p.Price
-                };
+            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
+                new {
+                p.Name,
+                c.QuantityOfProduct,
+                p.Price
             });
 
             return kq;
@@ -79,9 +78,11 @@ namespace WebAPIBookStore.Repository
         public bool Save()
         {
             var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            if (saved > 0)
+                return true;
+            return false;
         }
-
+        
         public bool UpdateCartItem(CartItem cartItem, CartItem cartItemUpdate)
         {
             cartItemUpdate.QuantityOfProduct = cartItem.QuantityOfProduct;

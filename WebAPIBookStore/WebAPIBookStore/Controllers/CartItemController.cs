@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Crypto.Macs;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using WebAPIBookStore.Repository;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -36,7 +33,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetCartItems()
         {
             var cartItems = _cartItemRepository.GetCartItems();
-            if (cartItems.Count() <= 0)
+            if (cartItems.Count <= 0)
                 return NotFound();
 
             var cartItemMaps = _mapper.Map<List<CartItemDto>>(cartItems);
@@ -93,7 +90,7 @@ namespace WebAPIBookStore.Controllers
 
             var cartItemUpdate = _cartItemRepository.GetCartItem(id);
             if (cartItemUpdate == null)
-                return NotFound("Not found cartitem");
+                return NotFound("Not found cartItem");
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemInput);
             if (!_cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate))

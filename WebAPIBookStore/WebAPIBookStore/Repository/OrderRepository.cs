@@ -1,8 +1,6 @@
-﻿using MessagePack;
-using WebAPIBookStore.Data;
+﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-using ZstdSharp.Unsafe;
 
 namespace WebAPIBookStore.Repository
 {
@@ -58,7 +56,9 @@ namespace WebAPIBookStore.Repository
         public bool Save()
         {
             var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            if (saved > 0)
+                return true;
+            return false;
         }
 
         public bool UpdateOrder(Order orderUpdate, string status, int manageId)
