@@ -22,21 +22,24 @@ namespace WebAPIBookStore.Controllers
         [HttpGet]
         public IActionResult GetCategories()
         {
-            var categories = _mapper.Map<List<CategoryDto>>(_categoryRepository.GetCategories());
+            var categories = _categoryRepository.GetCategories();
             if (categories.Count <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(categories) : BadRequest(ModelState);
+            var categoryMaps = _mapper.Map<List<CategoryDto>>(categories);
+
+            return ModelState.IsValid ? Ok(categoryMaps) : BadRequest(ModelState);
         }
 
         [HttpGet("id")]
         public IActionResult GetCategory([FromQuery] int id)
         {
-            if (!_categoryRepository.CategoryExists(id))
+            var category = _categoryRepository.GetCategory(id);
+            if (category == null)
                 return NotFound("Not found category");
 
-            var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(id));
-            return ModelState.IsValid ? Ok(category) : BadRequest(ModelState);
+            var categoryMap = _mapper.Map<CategoryDto>(category);
+            return ModelState.IsValid ? Ok(categoryMap) : BadRequest(ModelState);
         }
 
         [HttpPost]

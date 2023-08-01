@@ -29,21 +29,23 @@ namespace WebAPIBookStore.Controllers
         [HttpGet]
         public IActionResult GetOrders()
         {
-            var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrders());
+            var orders = _orderRepository.GetOrders();
             if (orders.Count <= 0)
                 return NotFound();
-
-            return ModelState.IsValid? Ok(orders) : BadRequest(ModelState);
+            
+            var orderMaps = _mapper.Map<List<Order>>(orders);
+            return ModelState.IsValid? Ok(orderMaps) : BadRequest(ModelState);
         }
 
         [HttpGet("status")]
         public IActionResult GetOrderByStatus([FromQuery] string status)
         {
-            var orders = _mapper.Map<List<Order>>(_orderRepository.GetOrderByStatus(status));
+            var orders = _orderRepository.GetOrderByStatus(status);
             if (orders.Count <= 0)
                 return NotFound();
 
-            return ModelState.IsValid ? Ok(orders) : BadRequest(ModelState);
+            var orderMaps = _mapper.Map<List<Order>>(orders);
+            return ModelState.IsValid ? Ok(orderMaps) : BadRequest(ModelState);
         }
 
         [HttpGet("id")]

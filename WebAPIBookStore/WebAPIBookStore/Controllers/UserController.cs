@@ -19,17 +19,6 @@ namespace WebAPIBookStore.Controllers
             _mapper = mapper;
         }
 
-        //[HttpGet]
-        //public IActionResult GetUsers()
-        //{
-        //    var users = _userRepository.GetUsers;
-        //    if (users == null)
-        //        return NotFound();
-
-        //    var userMaps = _mapper.Map<List<UserDto>>(users);
-        //    return ModelState.IsValid ? Ok(users) : BadRequest(ModelState);
-        //}
-
         [HttpGet("role")]
         public IActionResult GetUsersByRole([FromQuery] string role)
         {
