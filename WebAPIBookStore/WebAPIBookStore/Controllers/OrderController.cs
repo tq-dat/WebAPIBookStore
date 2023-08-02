@@ -37,10 +37,10 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid? Ok(orderMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("status")]
-        public IActionResult GetOrderByStatus([FromQuery] string status)
+        [HttpGet("Status")]
+        public IActionResult GetOrderByStatus([FromQuery] string name)
         {
-            var orders = _orderRepository.GetOrderByStatus(status);
+            var orders = _orderRepository.GetOrderByStatus(name);
             if (orders.Count <= 0)
                 return NotFound();
 
@@ -48,8 +48,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(orderMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("id")]
-        public IActionResult GetOrder([FromQuery] int id)
+        [HttpGet("{id}")]
+        public IActionResult GetOrder(int id)
         {
             var order = _orderRepository.GetOrder(id);
             if (order == null)
@@ -58,8 +58,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(order) : BadRequest(ModelState);
         }
 
-        [HttpGet("user/userId")]
-        public IActionResult GetOrderByUserId([FromQuery] int userId)
+        [HttpGet("User/{userId}")]
+        public IActionResult GetOrderByUserId(int userId)
         {
             var orders = _orderRepository.GetOrderByUserId(userId);
             if (orders.Count <= 0)
@@ -69,7 +69,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateOrder([FromBody] OrderCreate orderCreate, [FromQuery] int userId)
+        public IActionResult CreateOrder([FromBody] OrderCreate orderCreate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -77,7 +77,7 @@ namespace WebAPIBookStore.Controllers
             if (orderCreate.CartItemIds.Count <= 0)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.UserExists(userId))
+            if (!_userRepository.UserExists(orderCreate.userId))
                 return NotFound("Not found user");
 
             List<CartItem> cartItems = new List<CartItem>();
@@ -94,7 +94,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
-            if (!_orderRepository.CreateOrder(cartItems, orderMap, userId))
+            if (!_orderRepository.CreateOrder(cartItems, orderMap, orderCreate.userId))
             {
                 ModelState.AddModelError("", "Something went wrong");
                 return StatusCode(500, ModelState);
@@ -104,19 +104,19 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateOrder([FromQuery] int orderId, [FromQuery] string status, [FromQuery] int manageId)
+        public IActionResult UpdateOrder([FromBody] OrderUpdate input)
         {
-            var orderUpdate = _orderRepository.GetOrder(orderId);
+            var orderUpdate = _orderRepository.GetOrder(input.orderId);
             if (orderUpdate == null)
                 return NotFound("Not found order");
 
-            if (!_userRepository.ManageExists(manageId))
+            if (!_userRepository.ManageExists(input.manageId))
                 return NotFound("Not found manage");
 
-            if (status != "Cancel" || status != "Success")
+            if (input.status != "Cancel" || input.status != "Success")
                 return BadRequest("Status not true");
 
-            return !_orderRepository.UpdateOrder(orderUpdate, status, manageId) ? Ok("Successfully updated") : BadRequest();
+            return !_orderRepository.UpdateOrder(orderUpdate, input.status, input.manageId) ? Ok("Successfully updated") : BadRequest();
         }
    
     }

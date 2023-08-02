@@ -18,11 +18,11 @@ namespace WebAPIBookStore.Repository
             {
                 x.Order = order;
                 x.Status = "Paid";
-                x.Status = "Wait";
                 _context.Update(x);
             }
 
             order.UserId = userId;
+            order.Status = "wait";
             _context.Add(order);
             return Save();
         }

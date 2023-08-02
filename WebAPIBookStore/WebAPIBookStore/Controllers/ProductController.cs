@@ -31,8 +31,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
         
-        [HttpGet("id")]
-        public IActionResult GetProduct([FromQuery] int id)
+        [HttpGet("{id}")]
+        public IActionResult GetProduct(int id)
         {
             var product = _productRepository.GetProduct(id);
             if (product == null)
@@ -42,7 +42,7 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMap) : BadRequest(ModelState);
         }
         
-        [HttpGet("Category/categoryId")]
+        [HttpGet("Category")]
         public IActionResult GetProductsByCategoryId([FromQuery] int categoryId)
         {
             if (!_categoryRepository.CategoryExists(categoryId))
@@ -51,12 +51,12 @@ namespace WebAPIBookStore.Controllers
             var products = _productRepository.GetProductsByCategory(categoryId);
             if (products.Count <= 0)
                 return NotFound();
-            
+             
             var productMaps = _mapper.Map<List<ProductDto>>(products);
             return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
         
-        [HttpGet("name")]
+        [HttpGet("Search")]
         public IActionResult GetProduct([FromQuery] string name)
         {
             var products = _productRepository.GetProductsByName(name);
@@ -67,23 +67,23 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(productMaps) : BadRequest(ModelState);
         }
         [HttpPost]
-        public IActionResult CreateProduct([FromQuery] int categoryId,[FromBody] ProductDto productCreate)
+        public IActionResult CreateProduct([FromBody] ProductCreate productCreate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CategoryExists(productCreate.categoryId))
                 return NotFound("Not found category");
             
-            var product = _productRepository.GetProducts().FirstOrDefault(c => c.Name.Trim().ToUpper() == productCreate.Name.Trim().ToUpper());
+            var product = _productRepository.GetProducts().FirstOrDefault(c => c.Name.Trim().ToUpper() == productCreate.ProductDto.Name.Trim().ToUpper());
             if (product != null)
             {
                 ModelState.AddModelError("", "Product already exists");
                 return StatusCode(422, ModelState);
             }
             
-            var productMap = _mapper.Map<Product>(productCreate);
-            if (!_productRepository.CreateProduct(categoryId, productMap))
+            var productMap = _mapper.Map<Product>(productCreate.ProductDto);
+            if (!_productRepository.CreateProduct(productCreate.categoryId, productMap))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -92,12 +92,12 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully created");
         }
         [HttpPut]
-        public IActionResult UpdateProduct(int prodId, ProductDto product)
+        public IActionResult UpdateProduct(ProductDto product)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             
-            var productUpdate = _productRepository.GetProduct(prodId);
+            var productUpdate = _productRepository.GetProduct(product.Id);
             if (productUpdate == null)
                 return NotFound("Not found product");
             
@@ -111,8 +111,8 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
         
-        [HttpDelete("id")]
-        public IActionResult DeleteProduct([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProduct(int id)
         {
             var product = _productRepository.GetProduct(id);
             if (product == null)

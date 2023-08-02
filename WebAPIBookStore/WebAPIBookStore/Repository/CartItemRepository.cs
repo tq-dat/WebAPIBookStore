@@ -1,4 +1,5 @@
 ﻿using WebAPIBookStore.Data;
+using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -18,14 +19,8 @@ namespace WebAPIBookStore.Repository
             return _context.CartItems.Any(p => p.Id == id);
         }
 
-        public bool CreateCartItem(int productId, int userId, CartItem cartItem)
+        public bool CreateCartItem(CartItem cartItem)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == productId);
-            var user = _context.Users.FirstOrDefault(p => p.Id == userId);
-            
-            cartItem.Product = product;
-            cartItem.User = user;
-     
             _context.Add(cartItem);
             return Save();
         }
@@ -44,28 +39,28 @@ namespace WebAPIBookStore.Repository
             return _context.CartItems.FirstOrDefault(p => p.Id == id);
         }
 
-        public Object GetCartItemByUserId(int userId)
+        public List<CartDetail> GetCartItemByUserId(int userId)
         {
             var cartItems = _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
             var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
-                new {
-                p.Name,
-                c.QuantityOfProduct,
-                p.Price
-            });
+                new CartDetail{
+                Name = p.Name,
+                QuantityOfProduct = c.QuantityOfProduct,
+                Price = p.Price
+            }).ToList();
 
             return kq;
         }
 
-        public Object GetCartItemByOrderId(int orderId)
+        public List<CartDetail> GetCartItemByOrderId(int orderId)
         {
             var cartItems = _context.CartItems.Where(c => c.OrderId == orderId && c.Status == "Paid").ToList();
-            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
-                new {
-                p.Name,
-                c.QuantityOfProduct,
-                p.Price
-            });
+            var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) =>
+                new CartDetail{
+                Name = p.Name,
+                QuantityOfProduct = c.QuantityOfProduct,
+                Price = p.Price
+            }).ToList();
 
             return kq;
         }

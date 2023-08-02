@@ -19,10 +19,10 @@ namespace WebAPIBookStore.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("role")]
-        public IActionResult GetUsersByRole([FromQuery] string role)
+        [HttpGet("Role")]
+        public IActionResult GetUsersByRole([FromQuery] string name)
         {
-            var users = _userRepository.GetUsersByRole(role);
+            var users = _userRepository.GetUsersByRole(name);
             if (users.Count <= 0)
                 return NotFound();
 
@@ -33,8 +33,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("id")]
-        public IActionResult GetUserByUserId([FromQuery] int id) 
+        [HttpGet("{id}")]
+        public IActionResult GetUserByUserId(int id) 
         {
             var user = _userRepository.GetUser(id);
             if (user == null) 
@@ -43,7 +43,7 @@ namespace WebAPIBookStore.Controllers
             var userMap = _mapper.Map<UserDto>(user);
             return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
         }
-        [HttpGet("searchUser/name")]
+        [HttpGet("SearchUser")]
         public IActionResult GetUsersByName([FromQuery] string name)
         {
             var users = _userRepository.GetUsersByName(name);
@@ -102,7 +102,7 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
             var deleteUser = _userRepository.GetUser(id);

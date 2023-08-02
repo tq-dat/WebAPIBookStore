@@ -31,8 +31,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(categoryMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("id")]
-        public IActionResult GetCategory([FromQuery] int id)
+        [HttpGet("{id}")]
+        public IActionResult GetCategory(int id)
         {
             var category = _categoryRepository.GetCategory(id);
             if (category == null)
@@ -66,13 +66,13 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateCategory([FromQuery] int id,[FromQuery] string name)
+        public IActionResult UpdateCategory([FromBody] CategoryDto categoryDto)
         {
-            var category = _categoryRepository.GetCategory(id);
+            var category = _categoryRepository.GetCategory(categoryDto.Id);
             if (category == null)
                 return NotFound("Not found category");
 
-            if (!_categoryRepository.UpdateCategory(category,name))
+            if (!_categoryRepository.UpdateCategory(category,categoryDto.Name))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -81,8 +81,8 @@ namespace WebAPIBookStore.Controllers
             return Ok("Successfully updated");
         }
 
-        [HttpDelete("id")]
-        public IActionResult DeleteCategory([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCategory(int id)
         {
             var deleteCategory = _categoryRepository.GetCategory(id);
             if (deleteCategory == null)
