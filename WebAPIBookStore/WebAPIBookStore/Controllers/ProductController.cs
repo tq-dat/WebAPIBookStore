@@ -5,7 +5,7 @@ using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 namespace WebAPIBookStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Product")]
     [ApiController]
     public class ProductController : ControllerBase
     {
@@ -85,11 +85,11 @@ namespace WebAPIBookStore.Controllers
             }
 
             var productMap = _mapper.Map<Product>(productCreate.ProductDto);
-            return _productRepository.CreateProduct(productCreate.CategoryId, productMap) ? Ok("Successfully created") : BadRequest(ModelState);
+            return _productRepository.CreateProduct(productCreate.CategoryId, productMap) ? Ok(productMap) : BadRequest(ModelState);
         }
 
         [HttpPut]
-        public IActionResult UpdateProduct(ProductDto product)
+        public IActionResult UpdateProduct([FromBody] ProductDto product)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -99,17 +99,17 @@ namespace WebAPIBookStore.Controllers
                 return NotFound("Not found product");
 
             var productMap = _mapper.Map<Product>(product);
-            return _productRepository.UpdateProduct(productUpdate, productMap) ? Ok("Successfully updated") : BadRequest(ModelState);
+            return _productRepository.UpdateProduct(productUpdate, productMap) ? Ok(productUpdate) : BadRequest(ModelState);
         }
 
-        [HttpDelete]
-        public IActionResult DeleteProduct([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProduct([FromRoute] int id)
         {
             var product = _productRepository.GetProduct(id);
             if (product == null)
                 return NotFound("Not found product");
 
-            return _productRepository.DeleteProduct(product) ? Ok("Successfully deleted") : BadRequest(ModelState);
+            return _productRepository.DeleteProduct(product) ? Ok(product) : BadRequest(ModelState);
         }
     }
 }

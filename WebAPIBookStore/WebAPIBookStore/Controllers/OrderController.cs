@@ -6,7 +6,7 @@ using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Order")]
     [ApiController]
     public class OrderController : ControllerBase
     {
@@ -58,8 +58,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(order) : BadRequest(ModelState);
         }
 
-        [HttpGet("User/{userId}")]
-        public IActionResult GetOrderByUserId(int userId)
+        [HttpGet("User")]
+        public IActionResult GetOrderByUserId([FromQuery] int userId)
         {
             var orders = _orderRepository.GetOrderByUserId(userId);
             return orders.Count <= 0 ? NotFound() : Ok(orders);
@@ -91,7 +91,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
-            return _orderRepository.CreateOrder(cartItems, orderMap, orderCreate.UserId) ? Ok("Successfully created") : BadRequest(ModelState);
+            return _orderRepository.CreateOrder(cartItems, orderMap, orderCreate.UserId) ? Ok(orderMap) : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -107,7 +107,7 @@ namespace WebAPIBookStore.Controllers
             if (input.Status != "Cancel" || input.Status != "Success")
                 return BadRequest("Status not true");
 
-            return _orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId) ? Ok("Successfully updated") : BadRequest(ModelState);
+            return _orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId) ? Ok(orderUpdate) : BadRequest(ModelState);
         }
    
     }

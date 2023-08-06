@@ -5,13 +5,14 @@ using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 namespace WebAPIBookStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Category")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
+        public CategoryController(ICategoryRepository categoryRepository,
+                                  IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
@@ -53,7 +54,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var categoryMap = _mapper.Map<Category>(categoryDto);
-            return _categoryRepository.CreateCategory(categoryMap) ? Ok("Successfully created") : BadRequest(ModelState);
+            return _categoryRepository.CreateCategory(categoryMap) ? Ok(categoryMap) : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -63,17 +64,17 @@ namespace WebAPIBookStore.Controllers
             if (category == null)
                 return NotFound("Not found category");
 
-            return _categoryRepository.UpdateCategory(category, categoryDto.Name) ? Ok("Successfully update") : BadRequest(ModelState);
+            return _categoryRepository.UpdateCategory(category, categoryDto.Name) ? Ok(category) : BadRequest(ModelState);
         }
 
-        [HttpDelete]
-        public IActionResult DeleteCategory([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCategory([FromRoute] int id)
         {
             var deleteCategory = _categoryRepository.GetCategory(id);
             if (deleteCategory == null)
                 return NotFound("Not found category");
 
-            return _categoryRepository.DeleteCategory(deleteCategory) ? Ok("Successfully deleted") : BadRequest(ModelState);
+            return _categoryRepository.DeleteCategory(deleteCategory) ? Ok(deleteCategory) : BadRequest(ModelState);
         }
     }
 }

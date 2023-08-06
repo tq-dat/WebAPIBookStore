@@ -6,7 +6,7 @@ using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/User")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -56,16 +56,16 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login(UserLogin userLogin)
+        public IActionResult Login([FromBody] UserLogin userLogin)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return !_userRepository.UserExists(userLogin) ? Ok("Login success") : NotFound(ModelState);      
+            return !_userRepository.UserExists(userLogin) ? Ok(userLogin) : NotFound(ModelState);      
         }
 
         [HttpPost("SignUp")]
-        public IActionResult SignUp(UserDto userCreate)
+        public IActionResult SignUp([FromBody] UserDto userCreate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -78,11 +78,11 @@ namespace WebAPIBookStore.Controllers
             }
 
             var userMap = _mapper.Map<User>(userCreate);
-            return _userRepository.CreateUser(userMap) ? Ok("Successfully created") : BadRequest(ModelState);
+            return _userRepository.CreateUser(userMap) ? Ok(userMap) : BadRequest(ModelState);
         }
 
         [HttpPut]
-        public IActionResult UpdateUser(UserDto userUpdate) 
+        public IActionResult UpdateUser([FromBody] UserDto userUpdate) 
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -91,17 +91,17 @@ namespace WebAPIBookStore.Controllers
                 return NotFound();
 
             var userMap = _mapper.Map<User>(userUpdate);
-            return _userRepository.UpdateUser(userMap) ? Ok("Successfully updated") : BadRequest(ModelState);
+            return _userRepository.UpdateUser(userMap) ? Ok(userMap) : BadRequest(ModelState);
         }
 
-        [HttpDelete]
-        public IActionResult DeleteUser([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteUser([FromRoute] int id)
         {
             var deleteUser = _userRepository.GetUser(id);
             if (deleteUser == null)
                 return NotFound();
 
-            return _userRepository.DeleteUser(deleteUser) ? Ok("Successfully deleted") : BadRequest(ModelState);
+            return _userRepository.DeleteUser(deleteUser) ? Ok(deleteUser) : BadRequest(ModelState);
         }
     }
 }

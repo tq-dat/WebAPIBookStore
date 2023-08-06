@@ -6,7 +6,7 @@ using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/CartItem")]
     [ApiController]
     public class CartItemController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace WebAPIBookStore.Controllers
                                   IUserRepository userRepository,
                                   IOrderRepository orderRepository,
                                   IProductRepository productRepository,
-                                  IMapper mapper) 
+                                  IMapper mapper)
         {
             _productRepository = productRepository;
             _orderRepository = orderRepository;
@@ -40,8 +40,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(cartItemMaps) : BadRequest(ModelState);
         }
 
-        [HttpGet("Order/{orderId}")]
-        public IActionResult GetCartItemByOrderId(int orderId)
+        [HttpGet("Order")]
+        public IActionResult GetCartItemByOrderId([FromQuery] int orderId)
         {
             if (!_orderRepository.OrderExists(orderId))
                 return NotFound("Not found order");
@@ -53,8 +53,8 @@ namespace WebAPIBookStore.Controllers
             return ModelState.IsValid ? Ok(cartItems) : BadRequest(ModelState);
         }
 
-        [HttpGet("User/{userId}")]
-        public IActionResult GetCartItemByUserId(int userId)
+        [HttpGet("User")]
+        public IActionResult GetCartItemByUserId([FromQuery] int userId)
         {
             if (!_userRepository.UserExists(userId))
                 return NotFound("Not found user");
@@ -79,7 +79,7 @@ namespace WebAPIBookStore.Controllers
                 return NotFound("Not found product");
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemDto);
-            return _cartItemRepository.CreateCartItem(cartItemMap) ? Ok("Successfully created") : BadRequest(ModelState);
+            return _cartItemRepository.CreateCartItem(cartItemMap) ? Ok(cartItemMap) : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -93,17 +93,17 @@ namespace WebAPIBookStore.Controllers
                 return NotFound("Not found cartItem");
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemInput);
-            return _cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate) ? Ok("Successfully updated") : BadRequest(ModelState);  
+            return _cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate) ? Ok(cartItemUpdate) : BadRequest(ModelState);  
         }
 
-        [HttpDelete]
-        public IActionResult DeleteCartItem([FromQuery] int id)
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteCartItem([FromRoute] int id)
         {
             var deleteCartItem = _cartItemRepository.GetCartItem(id);
             if (deleteCartItem == null)
                 return NotFound();
 
-            return _cartItemRepository.DeleteCartItem(deleteCartItem) ? Ok("Successfully deleted") : BadRequest(ModelState);
+            return _cartItemRepository.DeleteCartItem(deleteCartItem) ? Ok(deleteCartItem) : BadRequest(ModelState);
         }
     }
 }
