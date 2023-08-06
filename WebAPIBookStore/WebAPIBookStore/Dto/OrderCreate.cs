@@ -2,7 +2,7 @@
 {
     public class OrderCreate
     {
-        public int userId { get; set; }
+        public int UserId { get; set; }
         public OrderDto OrderDto { get; set; } = null!;
 
         public List<int> CartItemIds { get; set; } = null!;

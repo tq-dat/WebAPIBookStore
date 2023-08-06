@@ -79,13 +79,7 @@ namespace WebAPIBookStore.Controllers
                 return NotFound("Not found product");
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemDto);
-            if (!_cartItemRepository.CreateCartItem(cartItemMap))
-            {
-                ModelState.AddModelError("", "Something went wrong");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully created");
+            return _cartItemRepository.CreateCartItem(cartItemMap) ? Ok("Successfully created") : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -99,13 +93,7 @@ namespace WebAPIBookStore.Controllers
                 return NotFound("Not found cartItem");
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemInput);
-            if (!_cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate))
-            {
-                ModelState.AddModelError("", "Something went wrong");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully updated");
+            return _cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate) ? Ok("Successfully updated") : BadRequest(ModelState);  
         }
 
         [HttpDelete]
@@ -115,13 +103,7 @@ namespace WebAPIBookStore.Controllers
             if (deleteCartItem == null)
                 return NotFound();
 
-            if (!_cartItemRepository.DeleteCartItem(deleteCartItem))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully deleted");
+            return _cartItemRepository.DeleteCartItem(deleteCartItem) ? Ok("Successfully deleted") : BadRequest(ModelState);
         }
     }
 }

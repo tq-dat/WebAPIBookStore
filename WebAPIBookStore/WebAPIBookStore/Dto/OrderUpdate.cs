@@ -2,8 +2,8 @@
 {
     public class OrderUpdate
     {
-        public int orderId {  get; set; }
-        public string status { get; set; } = null!;
-        public int manageId { get; set; }
+        public int OrderId {  get; set; }
+        public string Status { get; set; } = null!;
+        public int ManageId { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class ProductCreate
     {
-        public int categoryId { get; set; }
+        public int CategoryId { get; set; }
         public ProductDto ProductDto { get; set; } = null!;
     }
 }

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
-
 namespace WebAPIBookStore.Controllers
 {
     [Route("api/[controller]")]
@@ -12,8 +11,7 @@ namespace WebAPIBookStore.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-
-        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper) 
+        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
@@ -27,7 +25,6 @@ namespace WebAPIBookStore.Controllers
                 return NotFound();
 
             var categoryMaps = _mapper.Map<List<CategoryDto>>(categories);
-
             return ModelState.IsValid ? Ok(categoryMaps) : BadRequest(ModelState);
         }
 
@@ -56,13 +53,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var categoryMap = _mapper.Map<Category>(categoryDto);
-            if (!_categoryRepository.CreateCategory(categoryMap))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully created");
+            return _categoryRepository.CreateCategory(categoryMap) ? Ok("Successfully created") : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -72,29 +63,17 @@ namespace WebAPIBookStore.Controllers
             if (category == null)
                 return NotFound("Not found category");
 
-            if (!_categoryRepository.UpdateCategory(category,categoryDto.Name))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully updated");
+            return _categoryRepository.UpdateCategory(category, categoryDto.Name) ? Ok("Successfully update") : BadRequest(ModelState);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        [HttpDelete]
+        public IActionResult DeleteCategory([FromQuery] int id)
         {
             var deleteCategory = _categoryRepository.GetCategory(id);
             if (deleteCategory == null)
                 return NotFound("Not found category");
 
-            if (!_categoryRepository.DeleteCategory(deleteCategory))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully deleted");
+            return _categoryRepository.DeleteCategory(deleteCategory) ? Ok("Successfully deleted") : BadRequest(ModelState);
         }
     }
 }

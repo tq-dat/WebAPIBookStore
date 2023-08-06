@@ -62,10 +62,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetOrderByUserId(int userId)
         {
             var orders = _orderRepository.GetOrderByUserId(userId);
-            if (orders.Count <= 0)
-                return NotFound();
-
-            return Ok(orders);
+            return orders.Count <= 0 ? NotFound() : Ok(orders);
         }
 
         [HttpPost]
@@ -77,7 +74,7 @@ namespace WebAPIBookStore.Controllers
             if (orderCreate.CartItemIds.Count <= 0)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.UserExists(orderCreate.userId))
+            if (!_userRepository.UserExists(orderCreate.UserId))
                 return NotFound("Not found user");
 
             List<CartItem> cartItems = new List<CartItem>();
@@ -94,29 +91,23 @@ namespace WebAPIBookStore.Controllers
             }
 
             var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
-            if (!_orderRepository.CreateOrder(cartItems, orderMap, orderCreate.userId))
-            {
-                ModelState.AddModelError("", "Something went wrong");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully created");
+            return _orderRepository.CreateOrder(cartItems, orderMap, orderCreate.UserId) ? Ok("Successfully created") : BadRequest(ModelState);
         }
 
         [HttpPut]
         public IActionResult UpdateOrder([FromBody] OrderUpdate input)
         {
-            var orderUpdate = _orderRepository.GetOrder(input.orderId);
+            var orderUpdate = _orderRepository.GetOrder(input.OrderId);
             if (orderUpdate == null)
                 return NotFound("Not found order");
 
-            if (!_userRepository.ManageExists(input.manageId))
+            if (!_userRepository.ManageExists(input.ManageId))
                 return NotFound("Not found manage");
 
-            if (input.status != "Cancel" || input.status != "Success")
+            if (input.Status != "Cancel" || input.Status != "Success")
                 return BadRequest("Status not true");
 
-            return !_orderRepository.UpdateOrder(orderUpdate, input.status, input.manageId) ? Ok("Successfully updated") : BadRequest();
+            return _orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId) ? Ok("Successfully updated") : BadRequest(ModelState);
         }
    
     }

@@ -43,6 +43,7 @@ namespace WebAPIBookStore.Controllers
             var userMap = _mapper.Map<UserDto>(user);
             return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
         }
+
         [HttpGet("SearchUser")]
         public IActionResult GetUsersByName([FromQuery] string name)
         {
@@ -77,13 +78,7 @@ namespace WebAPIBookStore.Controllers
             }
 
             var userMap = _mapper.Map<User>(userCreate);
-            if (!_userRepository.CreateUser(userMap))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully created");
+            return _userRepository.CreateUser(userMap) ? Ok("Successfully created") : BadRequest(ModelState);
         }
 
         [HttpPut]
@@ -92,30 +87,21 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userMap = _mapper.Map<User>(userUpdate);
-            if (!_userRepository.UpdateUser(userMap))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
+            if (_userRepository.UserExists(userUpdate.Id))
+                return NotFound();
 
-            return Ok("Successfully updated");
+            var userMap = _mapper.Map<User>(userUpdate);
+            return _userRepository.UpdateUser(userMap) ? Ok("Successfully updated") : BadRequest(ModelState);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        [HttpDelete]
+        public IActionResult DeleteUser([FromQuery] int id)
         {
             var deleteUser = _userRepository.GetUser(id);
             if (deleteUser == null)
                 return NotFound();
 
-            if (!_userRepository.DeleteUser(deleteUser))
-            {
-                ModelState.AddModelError("", "Something went wrong while savin");
-                return StatusCode(500, ModelState);
-            }
-
-            return Ok("Successfully deleted");
+            return _userRepository.DeleteUser(deleteUser) ? Ok("Successfully deleted") : BadRequest(ModelState);
         }
     }
 }
