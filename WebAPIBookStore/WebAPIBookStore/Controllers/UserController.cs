@@ -36,7 +36,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetUserByUserId(int id) 
+        public IActionResult GetUserByUserId([FromRoute] int id) 
         {
             var user = _userRepository.GetUser(id);
             if (user == null) 

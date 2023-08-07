@@ -34,7 +34,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetProduct(int id)
+        public IActionResult GetProduct([FromRoute] int id)
         {
             var product = _productRepository.GetProduct(id);
             if (product == null)

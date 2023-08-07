@@ -50,7 +50,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetOrder(int id)
+        public IActionResult GetOrder([FromRoute] int id)
         {
             var order = _orderRepository.GetOrder(id);
             if (order == null)

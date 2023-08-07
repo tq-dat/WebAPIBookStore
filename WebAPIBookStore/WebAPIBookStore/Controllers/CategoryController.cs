@@ -31,7 +31,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetCategory(int id)
+        public IActionResult GetCategory([FromRoute] int id)
         {
             var category = _categoryRepository.GetCategory(id);
             if (category == null)
