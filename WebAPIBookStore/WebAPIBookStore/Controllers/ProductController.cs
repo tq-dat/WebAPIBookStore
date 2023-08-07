@@ -12,9 +12,10 @@ namespace WebAPIBookStore.Controllers
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        public ProductController(IProductRepository productRepository,
-                                 ICategoryRepository categoryRepository,
-                                 IMapper mapper)
+        public ProductController(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            IMapper mapper)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
@@ -102,7 +103,7 @@ namespace WebAPIBookStore.Controllers
             return _productRepository.UpdateProduct(productUpdate, productMap) ? Ok(productUpdate) : BadRequest(ModelState);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public IActionResult DeleteProduct([FromRoute] int id)
         {
             var product = _productRepository.GetProduct(id);

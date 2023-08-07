@@ -11,8 +11,9 @@ namespace WebAPIBookStore.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        public CategoryController(ICategoryRepository categoryRepository,
-                                  IMapper mapper)
+        public CategoryController(
+            ICategoryRepository categoryRepository,
+            IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
@@ -67,7 +68,7 @@ namespace WebAPIBookStore.Controllers
             return _categoryRepository.UpdateCategory(category, categoryDto.Name) ? Ok(category) : BadRequest(ModelState);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public IActionResult DeleteCategory([FromRoute] int id)
         {
             var deleteCategory = _categoryRepository.GetCategory(id);
@@ -77,4 +78,4 @@ namespace WebAPIBookStore.Controllers
             return _categoryRepository.DeleteCategory(deleteCategory) ? Ok(deleteCategory) : BadRequest(ModelState);
         }
     }
-}
+}   

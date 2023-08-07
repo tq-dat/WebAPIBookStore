@@ -13,7 +13,9 @@ namespace WebAPIBookStore.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public UserController(IUserRepository userRepository, IMapper mapper) 
+        public UserController(
+            IUserRepository userRepository, 
+            IMapper mapper) 
         {
             _userRepository = userRepository;
             _mapper = mapper;
@@ -94,7 +96,7 @@ namespace WebAPIBookStore.Controllers
             return _userRepository.UpdateUser(userMap) ? Ok(userMap) : BadRequest(ModelState);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public IActionResult DeleteUser([FromRoute] int id)
         {
             var deleteUser = _userRepository.GetUser(id);

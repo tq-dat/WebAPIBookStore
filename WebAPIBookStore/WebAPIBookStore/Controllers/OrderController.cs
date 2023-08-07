@@ -15,10 +15,11 @@ namespace WebAPIBookStore.Controllers
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IMapper _mapper;
 
-        public OrderController(IOrderRepository orderRepository,
-                               IUserRepository userRepository,
-                               ICartItemRepository cartItemRepository,
-                               IMapper mapper)
+        public OrderController(
+            IOrderRepository orderRepository,
+            IUserRepository userRepository,
+            ICartItemRepository cartItemRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _orderRepository = orderRepository;
