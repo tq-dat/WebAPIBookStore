@@ -63,7 +63,7 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return !_userRepository.UserExists(userLogin) ? Ok(userLogin) : NotFound(ModelState);      
+            return _userRepository.UserExists(userLogin) ? Ok(userLogin) : NotFound(ModelState);      
         }
 
         [HttpPost("SignUp")]
