@@ -3,15 +3,15 @@ using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
-namespace WebAPIBookStore.Usecase
+namespace WebAPIBookStore.UseCase
 {
-    public class ProductUsecase
+    public class ProductUseCase
     {
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public ProductUsecase(
+        public ProductUseCase(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
             IMapper mapper)
@@ -25,7 +25,7 @@ namespace WebAPIBookStore.Usecase
         {
             var products = _productRepository.GetProducts();
             var output = new Output();
-            if (products.Count() <= 0)
+            if (products.Count <= 0)
             {
                 output.Success = false;
                 output.Error = "404";
@@ -68,7 +68,7 @@ namespace WebAPIBookStore.Usecase
             }
 
             var products = _productRepository.GetProductsByCategory(categoryId);
-            if (products.Count() <= 0)
+            if (products.Count <= 0)
             {
                 output.Success = false;
                 output.Error = "404";
@@ -85,7 +85,7 @@ namespace WebAPIBookStore.Usecase
         {
             var output = new Output();
             var products = _productRepository.GetProductsByName(name);
-            if (products.Count() <= 0)
+            if (products.Count <= 0)
             {
                 output.Success = false;
                 output.Error = "404";
