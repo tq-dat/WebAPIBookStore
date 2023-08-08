@@ -34,7 +34,6 @@ namespace WebAPIBookStore.UseCase
             }
 
             output.Success = true;
-
             output.Data = _mapper.Map<List<ProductDto>>(products);
             return output;
         }
@@ -98,11 +97,11 @@ namespace WebAPIBookStore.UseCase
             return output;
         }
 
-        public Output Post(int categoryId, ProductDto productCreate)
+        public Output Post(ProductCreate productCreate)
         {
 
             var output = new Output();
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CategoryExists(productCreate.CategoryId))
             {
                 output.Success = false;
                 output.Error = "404";
@@ -110,7 +109,7 @@ namespace WebAPIBookStore.UseCase
                 return output;
             }
 
-            var product = _productRepository.GetProducts().FirstOrDefault(c => c.Name.Trim().ToUpper() == productCreate.Name.Trim().ToUpper());
+            var product = _productRepository.GetProducts().FirstOrDefault(c => c.Name.Trim().ToUpper() == productCreate.ProductDto.Name.Trim().ToUpper());
             if (product != null)
             {
                 output.Success = false;
@@ -119,8 +118,8 @@ namespace WebAPIBookStore.UseCase
                 return output;
             }
 
-            var productMap = _mapper.Map<Product>(productCreate);
-            if (!_productRepository.CreateProduct(categoryId, productMap))
+            var productMap = _mapper.Map<Product>(productCreate.ProductDto);
+            if (!_productRepository.CreateProduct(productCreate.CategoryId, productMap))
             {
                 output.Success = false;
                 output.Error = "500";
@@ -133,10 +132,10 @@ namespace WebAPIBookStore.UseCase
             return output;
         }
 
-        public Output Put(int prodId, ProductDto product) 
+        public Output Put(ProductDto product) 
         {
             var output = new Output();
-            var productUpdate = _productRepository.GetProduct(prodId);
+            var productUpdate = _productRepository.GetProduct(product.Id);
             if (productUpdate == null)
             {
                 output.Success = false;

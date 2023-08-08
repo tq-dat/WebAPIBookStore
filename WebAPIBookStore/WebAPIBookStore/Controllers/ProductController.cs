@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Dto;
-using WebAPIBookStore.Interfaces;
-using WebAPIBookStore.Models;
-using WebAPIBookStore.Usecase;
+using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -11,51 +8,39 @@ namespace WebAPIBookStore.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductUsecase _productUsecase;
+        private readonly ProductUseCase _productUseCase;
 
-        public ProductController(ProductUsecase productUsecase)
+        public ProductController(ProductUseCase productUseCase)
         {
-            _productUsecase = productUsecase;
+            _productUseCase = productUseCase;
         }
 
         [HttpGet]
         public IActionResult GetProducts()
         {
-            var output = _productUsecase.Get();
-            if (output.Error == "404")
-                return NotFound(output);
-
-            return ModelState.IsValid ? Ok(output) : BadRequest(ModelState);
+            var output = _productUseCase.Get();
+            return output.Error == "404" ? NotFound(output) : Ok(output);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetProduct([FromRoute] int id)
         {
-            var output = _productUsecase.GetById(id);
-            if (output.Error == "404")
-                return NotFound(output);
-
-            return ModelState.IsValid ? Ok(output) : BadRequest(ModelState);
+            var output = _productUseCase.GetById(id);
+            return output.Error == "404" ? NotFound(output) : Ok(output);
         }
 
         [HttpGet("Category")]
         public IActionResult GetProductsByCategoryId([FromQuery] int categoryId)
         {
-            var output = _productUsecase.GetByCategory(categoryId);
-            if (output.Error == "404")
-                return NotFound(output);
-
-            return ModelState.IsValid ? Ok(output) : BadRequest(ModelState);
+            var output = _productUseCase.GetByCategory(categoryId);
+            return output.Error == "404" ? NotFound(output) : Ok(output);
         }
 
         [HttpGet("Search")]
         public IActionResult GetProduct([FromQuery] string name)
         {
-            var output = _productUsecase.GetByName(name);
-            if (output.Error == "404")
-                return NotFound(output);
-
-            return ModelState.IsValid ? Ok(output) : BadRequest(ModelState);
+            var output = _productUseCase.GetByName(name);
+            return output.Error == "404" ? NotFound(output) : Ok(output);   
         }
 
         [HttpPost]
@@ -64,7 +49,7 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _productUsecase.Post(productCreate.CategoryId, productCreate.ProductDto);
+            var output = _productUseCase.Post(productCreate);
             if (output.Success == false)
             {
                 if (output.Error == "404")
@@ -86,7 +71,7 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _productUsecase.Put(product.Id, product);
+            var output = _productUseCase.Put(product);
             if (output.Success == false)
             {
                 if (output.Error == "404")
@@ -105,7 +90,7 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _productUsecase.Delete(id);
+            var output = _productUseCase.Delete(id);
             if (output.Success == false)
             {
                 if (output.Error == "404")
