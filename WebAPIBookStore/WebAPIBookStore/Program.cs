@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using WebAPIBookStore.Data;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Repository;
+using WebAPIBookStore.UseCase;
 using WebBookStore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,11 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ProductUseCase, ProductUseCase>();
+//builder.Services.AddScoped<CategoryUseCase, CategoryUseCase>();
+//builder.Services.AddScoped<UserUseCase, UserUseCase>();
+//builder.Services.AddScoped<CartItemUseCase, CartItemUseCase>();
+//builder.Services.AddScoped<OrderUseCase, OrderUseCase>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
