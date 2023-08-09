@@ -1,5 +1,5 @@
-﻿using AutoMapper.Configuration.Conventions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.UseCase;
 
@@ -10,41 +10,38 @@ namespace WebAPIBookStore.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ProductUseCase _productUseCase;
-        private readonly Const _const;
         public ProductController(
-            ProductUseCase productUseCase,
-            Const @const)
+            ProductUseCase productUseCase)
         {
             _productUseCase = productUseCase;
-            _const = @const;
         }
 
         [HttpGet]
         public IActionResult GetProducts()
         {
             var output = _productUseCase.Get();
-            return output.Error != _const.NotFoundCode ? Ok(output) : NotFound(output);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetProduct([FromRoute] int id)
         {
             var output = _productUseCase.GetById(id);
-            return output.Error != _const.NotFoundCode ? Ok(output) : NotFound(output);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("Category")]
         public IActionResult GetProductsByCategoryId([FromQuery] int categoryId)
         {
             var output = _productUseCase.GetByCategory(categoryId);
-            return output.Error != _const.NotFoundCode ? Ok(output) : NotFound(output);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("Search")]
         public IActionResult GetProduct([FromQuery] string name)
         {
             var output = _productUseCase.GetByName(name);
-            return output.Error != _const.NotFoundCode ? Ok(output) : NotFound(output);   
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);   
         }
 
         [HttpPost]
@@ -58,13 +55,13 @@ namespace WebAPIBookStore.Controllers
             {
                 switch (output.Error)
                 {
-                    case "404":
+                    case StatusCodeAPI.NotFound:
                         return NotFound(output);
 
-                    case "422":
+                    case StatusCodeAPI.UnprocessableEntity:
                         return StatusCode(422, output);
 
-                    case "500":
+                    case StatusCodeAPI.InternalServer:
                         return BadRequest(output);
                 }
             }
@@ -83,10 +80,10 @@ namespace WebAPIBookStore.Controllers
             {
                 switch (output.Error)
                 {
-                    case "404":
+                    case StatusCodeAPI.NotFound:
                         return NotFound(output);
 
-                    case "500":
+                    case StatusCodeAPI.InternalServer:
                         return BadRequest(output);
                 }
             }
@@ -105,10 +102,10 @@ namespace WebAPIBookStore.Controllers
             {
                 switch (output.Error)
                 {
-                    case "404":
+                    case StatusCodeAPI.NotFound:
                         return NotFound(output);
 
-                    case "500":
+                    case StatusCodeAPI.InternalServer:
                         return BadRequest(output);
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
@@ -10,18 +11,15 @@ namespace WebAPIBookStore.UseCase
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        private readonly Const _const;
 
         public ProductUseCase(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
-            IMapper mapper,
-            Const @const)
+            IMapper mapper)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
-            _const = @const;
         }
 
         public Output Get()
@@ -31,7 +29,7 @@ namespace WebAPIBookStore.UseCase
             if (!products.Any())
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found product";
                 return output;
             }
@@ -48,7 +46,7 @@ namespace WebAPIBookStore.UseCase
             if (product == null)
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -64,7 +62,7 @@ namespace WebAPIBookStore.UseCase
             if (!_categoryRepository.CategoryExists(categoryId))
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found categoryId";
                 return output;
             }
@@ -73,7 +71,7 @@ namespace WebAPIBookStore.UseCase
             if (!products.Any())
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found product";
                 return output;
             }
@@ -90,7 +88,7 @@ namespace WebAPIBookStore.UseCase
             if (!products.Any())
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found product";
                 return output;
             }
@@ -107,7 +105,7 @@ namespace WebAPIBookStore.UseCase
             if (!_categoryRepository.CategoryExists(productCreate.CategoryId))
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found categoryId";
                 return output;
             }
@@ -116,7 +114,7 @@ namespace WebAPIBookStore.UseCase
             if (product != null)
             {
                 output.Success = false;
-                output.Error = _const.UnprocessableEntityCode;
+                output.Error = StatusCodeAPI.UnprocessableEntity;
                 output.Message = "Product already exists";
                 return output;
             }
@@ -125,7 +123,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.CreateProduct(productCreate.CategoryId, productMap))
             {
                 output.Success = false;
-                output.Error = _const.InternalServerError;
+                output.Error = StatusCodeAPI.InternalServer;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
@@ -142,7 +140,7 @@ namespace WebAPIBookStore.UseCase
             if (productUpdate == null)
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -151,7 +149,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.UpdateProduct(productUpdate, productMap))
             {
                 output.Success = false;
-                output.Error = _const.InternalServerError;
+                output.Error = StatusCodeAPI.InternalServer;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
@@ -168,7 +166,7 @@ namespace WebAPIBookStore.UseCase
             if (product == null)
             {
                 output.Success = false;
-                output.Error = _const.NotFoundCode;
+                output.Error = StatusCodeAPI.NotFound;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -176,7 +174,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.DeleteProduct(product))
             {
                 output.Success = false;
-                output.Error = _const.InternalServerError;
+                output.Error = StatusCodeAPI.InternalServer;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
