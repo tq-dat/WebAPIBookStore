@@ -10,25 +10,28 @@ namespace WebAPIBookStore.UseCase
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private readonly Const _const;
 
         public ProductUseCase(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
-            IMapper mapper)
+            IMapper mapper,
+            Const @const)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
+            _const = @const;
         }
 
         public Output Get()
         {
             var products = _productRepository.GetProducts();
             var output = new Output();
-            if (products.Count <= 0)
+            if (!products.Any())
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found product";
                 return output;
             }
@@ -45,7 +48,7 @@ namespace WebAPIBookStore.UseCase
             if (product == null)
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -61,16 +64,16 @@ namespace WebAPIBookStore.UseCase
             if (!_categoryRepository.CategoryExists(categoryId))
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found categoryId";
                 return output;
             }
 
             var products = _productRepository.GetProductsByCategory(categoryId);
-            if (products.Count <= 0)
+            if (!products.Any())
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found product";
                 return output;
             }
@@ -84,10 +87,10 @@ namespace WebAPIBookStore.UseCase
         {
             var output = new Output();
             var products = _productRepository.GetProductsByName(name);
-            if (products.Count <= 0)
+            if (!products.Any())
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found product";
                 return output;
             }
@@ -104,7 +107,7 @@ namespace WebAPIBookStore.UseCase
             if (!_categoryRepository.CategoryExists(productCreate.CategoryId))
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found categoryId";
                 return output;
             }
@@ -113,7 +116,7 @@ namespace WebAPIBookStore.UseCase
             if (product != null)
             {
                 output.Success = false;
-                output.Error = "422";
+                output.Error = _const.UnprocessableEntityCode;
                 output.Message = "Product already exists";
                 return output;
             }
@@ -122,7 +125,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.CreateProduct(productCreate.CategoryId, productMap))
             {
                 output.Success = false;
-                output.Error = "500";
+                output.Error = _const.InternalServerError;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
@@ -139,7 +142,7 @@ namespace WebAPIBookStore.UseCase
             if (productUpdate == null)
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -148,7 +151,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.UpdateProduct(productUpdate, productMap))
             {
                 output.Success = false;
-                output.Error = "500";
+                output.Error = _const.InternalServerError;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
@@ -165,7 +168,7 @@ namespace WebAPIBookStore.UseCase
             if (product == null)
             {
                 output.Success = false;
-                output.Error = "404";
+                output.Error = _const.NotFoundCode;
                 output.Message = "Not found productId";
                 return output;
             }
@@ -173,7 +176,7 @@ namespace WebAPIBookStore.UseCase
             if (!_productRepository.DeleteProduct(product))
             {
                 output.Success = false;
-                output.Error = "500";
+                output.Error = _const.InternalServerError;
                 output.Message = "Something went wrong while saving";
                 return output;
             }
