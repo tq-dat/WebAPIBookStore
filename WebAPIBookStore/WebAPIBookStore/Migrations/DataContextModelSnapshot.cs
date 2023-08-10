@@ -50,7 +50,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Category", b =>
@@ -66,7 +66,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Order", b =>
@@ -93,7 +93,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Product", b =>
@@ -122,7 +122,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.ProductCategory", b =>
@@ -137,7 +137,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ProductCategories", (string)null);
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.User", b =>
@@ -164,10 +164,8 @@ namespace WebAPIBookStore.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -176,7 +174,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.CartItem", b =>
