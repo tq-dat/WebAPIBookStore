@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -19,7 +20,7 @@ namespace WebAPIBookStore.UseCase
             _mapper = mapper;
         }
 
-        public Output GetByRole(string role)
+        public Output GetByRole(Role role)
         {
             var output = new Output();
             var users = _userRepository.GetUsersByRole(role);
