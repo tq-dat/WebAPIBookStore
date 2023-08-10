@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
+using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 using WebAPIBookStore.UseCase;
 
@@ -17,7 +19,7 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Role")]
-        public IActionResult GetUsersByRole([FromQuery] string role)
+        public IActionResult GetUsersByRole([FromQuery] Role role)
         {
             var output = _userUseCase.GetByRole(role);
             return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);

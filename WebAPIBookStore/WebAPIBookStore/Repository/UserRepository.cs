@@ -1,5 +1,6 @@
 ﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -33,7 +34,7 @@ namespace WebAPIBookStore.Repository
             }
 
             deleteUser.UserName = "Deleted";
-            deleteUser.Role = "Deleted";
+            deleteUser.Role = Role.DeletedUser;
             _context.Update(deleteUser);    
             return Save();
         }
@@ -53,14 +54,14 @@ namespace WebAPIBookStore.Repository
             return _context.Users.Where(p => p.UserName.Contains(name)).ToList();
         }
 
-        public ICollection<User> GetUsersByRole(string role)
+        public ICollection<User> GetUsersByRole(Role role)
         {
             return _context.Users.Where(u => u.Role == role).ToList();
         }
 
         public bool ManageExists(int manageId)
         {
-            return _context.Users.Any(p => p.Id == manageId && (p.Role == "admin" || p.Role == "manage"));
+            return _context.Users.Any(p => p.Id == manageId && (p.Role == Role.Admin || p.Role == Role.Manage));
         }
 
         public bool Save()

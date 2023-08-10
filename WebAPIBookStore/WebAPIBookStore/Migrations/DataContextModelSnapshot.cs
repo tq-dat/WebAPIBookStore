@@ -50,7 +50,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Category", b =>
@@ -66,7 +66,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Order", b =>
@@ -93,7 +93,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Product", b =>
@@ -122,7 +122,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.ProductCategory", b =>
@@ -137,7 +137,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.User", b =>
@@ -176,7 +176,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.CartItem", b =>
