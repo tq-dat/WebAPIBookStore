@@ -4,7 +4,7 @@ namespace WebAPIBookStore.Interfaces
 {
     public interface IOrderRepository
     {
-        public ICollection<Order> GetOrders();
+        public Object GetOrders();
         public ICollection<Order> GetOrderByStatus(string status);
         public ICollection<Order> GetOrderByUserId(int userId);
         public Order? GetOrder(int id);

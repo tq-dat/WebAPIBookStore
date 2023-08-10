@@ -1,8 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
-using WebAPIBookStore.Interfaces;
-using WebAPIBookStore.Models;
+using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -10,60 +9,38 @@ namespace WebAPIBookStore.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IOrderRepository _orderRepository;
-        private readonly ICartItemRepository _cartItemRepository;
-        private readonly IMapper _mapper;
-
-        public OrderController(
-            IOrderRepository orderRepository,
-            IUserRepository userRepository,
-            ICartItemRepository cartItemRepository,
-            IMapper mapper)
+        private readonly OrderUseCase _orderUseCase;
+        public OrderController(OrderUseCase orderUseCase)
         {
-            _userRepository = userRepository;
-            _orderRepository = orderRepository;
-            _cartItemRepository = cartItemRepository;
-            _mapper = mapper;
+            _orderUseCase = orderUseCase;
         }
 
         [HttpGet]
         public IActionResult GetOrders()
         {
-            var orders = _orderRepository.GetOrders();
-            if (orders.Count <= 0)
-                return NotFound();
-            
-            var orderMaps = _mapper.Map<List<Order>>(orders);
-            return ModelState.IsValid? Ok(orderMaps) : BadRequest(ModelState);
+            var output = _orderUseCase.Get();
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("Status")]
         public IActionResult GetOrderByStatus([FromQuery] string name)
         {
-            var orders = _orderRepository.GetOrderByStatus(name);
-            if (orders.Count <= 0)
-                return NotFound();
-
-            var orderMaps = _mapper.Map<List<Order>>(orders);
-            return ModelState.IsValid ? Ok(orderMaps) : BadRequest(ModelState);
+            var output = _orderUseCase.GetByStatus(name);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetOrder([FromRoute] int id)
         {
-            var order = _orderRepository.GetOrder(id);
-            if (order == null)
-                return NotFound();
-
-            return ModelState.IsValid ? Ok(order) : BadRequest(ModelState);
+            var output = _orderUseCase.GetById(id);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("User")]
         public IActionResult GetOrderByUserId([FromQuery] int userId)
         {
-            var orders = _orderRepository.GetOrderByUserId(userId);
-            return orders.Count <= 0 ? NotFound() : Ok(orders);
+            var output = _orderUseCase.GetByUserId(userId);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost]
@@ -72,44 +49,43 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (orderCreate.CartItemIds.Count <= 0)
-                return BadRequest(ModelState);
-
-            if (!_userRepository.UserExists(orderCreate.UserId))
-                return NotFound("Not found user");
-
-            List<CartItem> cartItems = new List<CartItem>();
-            foreach (int id in orderCreate.CartItemIds)
+            var output = _orderUseCase.Post(orderCreate);
+            if (!output.Success)
             {
-                var cartItem = _cartItemRepository.GetCartItem(id);
-                if (cartItem == null)
-                    return NotFound();
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-                if (cartItem.Status == "Paid")
-                    return BadRequest();
-
-                cartItems.Add(cartItem);
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
             }
 
-            var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
-            return _orderRepository.CreateOrder(cartItems, orderMap, orderCreate.UserId) ? Ok(orderMap) : BadRequest(ModelState);
+            return Ok(output);
         }
 
         [HttpPut]
         public IActionResult UpdateOrder([FromBody] OrderUpdate input)
         {
-            var orderUpdate = _orderRepository.GetOrder(input.OrderId);
-            if (orderUpdate == null)
-                return NotFound("Not found order");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (!_userRepository.ManageExists(input.ManageId))
-                return NotFound("Not found manage");
+            var output = _orderUseCase.Put(input);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            if (input.Status != "Cancel" || input.Status != "Success")
-                return BadRequest("Status not true");
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
 
-            return _orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId) ? Ok(orderUpdate) : BadRequest(ModelState);
+            return Ok(output);
         }
-   
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using WebAPIBookStore.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIBookStore.Data;
+using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -8,7 +10,8 @@ namespace WebAPIBookStore.Repository
     {
         private readonly DataContext _context;
 
-        public OrderRepository(DataContext context) {
+        public OrderRepository(DataContext context)
+        {
             _context = context;
         }
 
@@ -29,7 +32,7 @@ namespace WebAPIBookStore.Repository
 
         public Order? GetOrder(int id)
         {
-           return _context.Orders.FirstOrDefault(p => p.Id == id);
+            return _context.Orders.FirstOrDefault(p => p.Id == id);
         }
 
         public ICollection<Order> GetOrderByStatus(string status)
@@ -43,9 +46,30 @@ namespace WebAPIBookStore.Repository
             return _context.Orders.Where(p => p.UserId == userId).ToList();
         }
 
-        public ICollection<Order> GetOrders()
+        public Object GetOrders()
         {
-            return _context.Orders.ToList();
+            var orders = _context.Orders.ToList();
+            var kq = orders.Join(_context.Users, o => o.UserId, u => u.Id, (o, u) =>
+                new {
+                    Id = o.Id,
+                    Status = o.Status,
+                    DateOrder = o.DateOrder,
+                    UserName = u.UserName,
+                    UserEmail = u.Email,
+                    UserAddress = u.Address,
+                    CartItems = _context.CartItems.Where(c => c.OrderId == o.Id).Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) =>
+                        new {
+                            ProductName = p.Name,
+                            QuantityOfProduct = c.QuantityOfProduct,
+                            CartItemTotal = p.Price * c.QuantityOfProduct
+                        }).ToList(),
+                    Total = _context.CartItems.Where(c => c.OrderId == o.Id).Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) =>
+                        new {
+                            CartItemTotal = p.Price * c.QuantityOfProduct
+                        }).Sum(t => t.CartItemTotal)
+                }).ToList();
+
+            return kq;
         }
 
         public bool OrderExists(int id)
@@ -58,7 +82,7 @@ namespace WebAPIBookStore.Repository
             var saved = _context.SaveChanges();
             if (saved > 0)
                 return true;
-            
+
             return false;
         }
 
