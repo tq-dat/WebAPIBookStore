@@ -1,4 +1,5 @@
 ﻿using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Interfaces
@@ -6,7 +7,7 @@ namespace WebAPIBookStore.Interfaces
     public interface IUserRepository
     {
         public ICollection<User> GetUsers();
-        public ICollection<User> GetUsersByRole(string role);
+        public ICollection<User> GetUsersByRole(Role role);
         public User? GetUser(int userId);
         public ICollection<User> GetUsersByName(string name);
         public bool UserExists (UserLogin userLogin);

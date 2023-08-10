@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebAPIBookStore.Enum;
 
 namespace WebAPIBookStore.Dto
 {
@@ -9,6 +10,6 @@ namespace WebAPIBookStore.Dto
 
         public string Password { get; set; } = null!;
 
-        public string Role { get; set; } = null!;
+        public Role Role { get; set; }
     }
 }

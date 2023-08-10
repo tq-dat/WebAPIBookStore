@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebAPIBookStore.Enum;
 
 namespace WebAPIBookStore.Models;
 
@@ -19,8 +20,7 @@ public class User
     [MaxLength(255)]
     public string Address { get; set; } = null!;
 
-    [MaxLength(10)]
-    public string Role { get; set; } = null!;
+    public Role Role { get; set; }
 
     public ICollection<CartItem>? CartItems { get; set; }
 

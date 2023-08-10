@@ -1,4 +1,5 @@
 ﻿using WebAPIBookStore.Data;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Models;
 
 
@@ -47,7 +48,7 @@ namespace WebBookStore
                             Password = "dat123",
                             Email = "dat123@gmail.com",
                             Address = "Cau Giay, Ha Noi",
-                            Role = "User"
+                            Role = Role.User
                         }
                     }
                 };

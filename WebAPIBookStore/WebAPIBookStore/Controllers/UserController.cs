@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -22,9 +23,9 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Role")]
-        public IActionResult GetUsersByRole([FromQuery] string name)
+        public IActionResult GetUsersByRole([FromQuery] Role role)
         {
-            var users = _userRepository.GetUsersByRole(name);
+            var users = _userRepository.GetUsersByRole(role);
             if (users.Count <= 0)
                 return NotFound();
 
