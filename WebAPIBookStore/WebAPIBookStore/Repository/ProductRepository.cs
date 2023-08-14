@@ -1,4 +1,5 @@
 ﻿using WebAPIBookStore.Data;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -73,7 +74,7 @@ namespace WebAPIBookStore.Repository
                 _context.Remove(pc);
             }
 
-            var cartItems = _context.CartItems.Where(p => p.ProductId == productDelete.Id && p.Status == "UnPaid").ToList();
+            var cartItems = _context.CartItems.Where(p => p.ProductId == productDelete.Id && p.Status == CartItemStatus.UnPaid).ToList();
             foreach (var cartItem in cartItems)
             {
                 _context.Remove(cartItem);
