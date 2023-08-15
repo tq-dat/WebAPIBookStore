@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -39,9 +40,9 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Status")]
-        public IActionResult GetOrderByStatus([FromQuery] string name)
+        public IActionResult GetOrderByStatus([FromQuery] OrderStatus status)
         {
-            var orders = _orderRepository.GetOrderByStatus(name);
+            var orders = _orderRepository.GetOrderByStatus(status);
             if (orders.Count <= 0)
                 return NotFound();
 
@@ -85,7 +86,7 @@ namespace WebAPIBookStore.Controllers
                 if (cartItem == null)
                     return NotFound();
 
-                if (cartItem.Status == "Paid")
+                if (cartItem.Status == CartItemStatus.Paid)
                     return BadRequest();
 
                 cartItems.Add(cartItem);
@@ -105,7 +106,7 @@ namespace WebAPIBookStore.Controllers
             if (!_userRepository.ManageExists(input.ManageId))
                 return NotFound("Not found manage");
 
-            if (input.Status != "Cancel" || input.Status != "Success")
+            if (input.Status != OrderStatus.Cancel || input.Status != OrderStatus.Success)
                 return BadRequest("Status not true");
 
             return _orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId) ? Ok(orderUpdate) : BadRequest(ModelState);

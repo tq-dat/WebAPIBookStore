@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebAPIBookStore.Enum;
 
 namespace WebAPIBookStore.Dto
 {
@@ -10,7 +11,6 @@ namespace WebAPIBookStore.Dto
 
         public int? UserAdminId { get; set; }
 
-        [MaxLength(10)]
-        public string Status { get; set; } = null!;
+        public OrderStatus Status { get; set; }
     }
 }

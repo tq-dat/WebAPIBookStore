@@ -23,7 +23,7 @@ namespace WebAPIBookStore.Repository
 
         public bool DeleteUser(User deleteUser)
         {
-            var deleteCartItemIds = _context.CartItems.Where(p => p.UserId == deleteUser.Id && p.Status == "UnPaid").Select(p =>p.Id).ToList();
+            var deleteCartItemIds = _context.CartItems.Where(p => p.UserId == deleteUser.Id && p.Status == CartItemStatus.UnPaid).Select(p =>p.Id).ToList();
             foreach (var cartItemId in deleteCartItemIds)
             {
                 var cartItem = _context.CartItems.FirstOrDefault(p => p.Id == cartItemId);
