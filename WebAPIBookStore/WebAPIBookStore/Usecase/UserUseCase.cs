@@ -33,7 +33,7 @@ namespace WebAPIBookStore.UseCase
             }
 
             output.Success = true;
-            output.Data = _mapper.Map<UserDto>(users);
+            output.Data = _mapper.Map<List<UserDto>>(users);
             return output;            
         }
 
@@ -113,10 +113,10 @@ namespace WebAPIBookStore.UseCase
             return output;
         }
 
-        public Output Put(UserDto userUpdate)
+        public Output Put(UserDto userInput)
         {
             var output = new Output();
-            var user = _userRepository.GetUser(userUpdate.Id);
+            var user = _userRepository.GetUser(userInput.Id);
             if (user == null)
             {
                 output.Success = false;
@@ -124,8 +124,8 @@ namespace WebAPIBookStore.UseCase
                 output.Message = "Not found user";
                 return output;
             }
-            var userMap = _mapper.Map<User>(userUpdate);
-            if (!_userRepository.UpdateUser(userMap))
+            var userMap = _mapper.Map<User>(userInput);
+            if (!_userRepository.UpdateUser(user, userMap))
             {
                 output.Success = false;
                 output.Error = StatusCodeAPI.InternalServer;

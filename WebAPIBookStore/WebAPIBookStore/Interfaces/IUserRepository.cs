@@ -14,7 +14,7 @@ namespace WebAPIBookStore.Interfaces
         public bool UserExists(int userId);
         public bool ManageExists(int manageId);
         public bool CreateUser(User user);
-        public bool UpdateUser(User user);
+        public bool UpdateUser(User userUpdate, User userInput);
         public bool DeleteUser(User deleteUser);
         public bool Save();
     }
