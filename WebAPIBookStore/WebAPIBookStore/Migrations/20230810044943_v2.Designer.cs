@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPIBookStore.Data;
 
@@ -10,9 +11,11 @@ using WebAPIBookStore.Data;
 namespace WebAPIBookStore.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230810044943_v2")]
+    partial class v2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,9 +37,10 @@ namespace WebAPIBookStore.Migrations
                     b.Property<int>("QuantityOfProduct")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("int");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -49,7 +53,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Category", b =>
@@ -65,7 +69,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Order", b =>
@@ -77,9 +81,10 @@ namespace WebAPIBookStore.Migrations
                     b.Property<DateTime>("DateOrder")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("int");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<int?>("UserAdminId")
                         .HasColumnType("int");
@@ -91,7 +96,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.Product", b =>
@@ -120,7 +125,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.ProductCategory", b =>
@@ -135,7 +140,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ProductCategories", (string)null);
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.User", b =>
@@ -172,7 +177,7 @@ namespace WebAPIBookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WebAPIBookStore.Models.CartItem", b =>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Data;
-using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -20,12 +20,12 @@ namespace WebAPIBookStore.Repository
             foreach (CartItem x in cartItems)
             {
                 x.Order = order;
-                x.Status = "Paid";
+                x.Status = CartItemStatus.Paid;
                 _context.Update(x);
             }
 
             order.UserId = userId;
-            order.Status = "wait";
+            order.Status = OrderStatus.Wait;
             _context.Add(order);
             return Save();
         }
@@ -35,9 +35,9 @@ namespace WebAPIBookStore.Repository
             return _context.Orders.FirstOrDefault(p => p.Id == id);
         }
 
-        public ICollection<Order> GetOrderByStatus(string status)
+        public ICollection<Order> GetOrderByStatus(OrderStatus status)
         {
-            var orders = _context.Orders.Where(p => p.Status.Contains(status)).ToList();
+            var orders = _context.Orders.Where(p => p.Status == status).ToList();
             return orders;
         }
 
@@ -86,7 +86,7 @@ namespace WebAPIBookStore.Repository
             return false;
         }
 
-        public bool UpdateOrder(Order orderUpdate, string status, int manageId)
+        public bool UpdateOrder(Order orderUpdate, OrderStatus status, int manageId)
         {
             orderUpdate.Status = status;
             orderUpdate.UserAdminId = manageId;

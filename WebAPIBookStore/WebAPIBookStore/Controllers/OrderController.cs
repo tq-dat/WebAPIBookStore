@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
@@ -23,9 +24,9 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Status")]
-        public IActionResult GetOrderByStatus([FromQuery] string name)
+        public IActionResult GetOrderByStatus([FromQuery] OrderStatus status)
         {
-            var output = _orderUseCase.GetByStatus(name);
+            var output = _orderUseCase.GetByStatus(status);
             return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 

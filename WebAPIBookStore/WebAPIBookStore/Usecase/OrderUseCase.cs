@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -60,7 +60,7 @@ namespace WebAPIBookStore.UseCase
             return output;
         }
 
-        public Output GetByStatus(string status)
+        public Output GetByStatus(OrderStatus status)
         {
             var output = new Output();
             var orders = _orderRepository.GetOrderByStatus(status);
@@ -125,7 +125,7 @@ namespace WebAPIBookStore.UseCase
                     return output;
                 }
 
-                if (cartItem.Status == "Paid")
+                if (cartItem.Status == CartItemStatus.Paid)
                 {
                     output.Success = false;
                     output.Error = StatusCodeAPI.InternalServer;
@@ -170,7 +170,7 @@ namespace WebAPIBookStore.UseCase
                 return output;
             }
 
-            if (input.Status != "Cancel" || input.Status != "Success")
+            if (input.Status != OrderStatus.Cancel || input.Status != OrderStatus.Success)
             {
                 output.Success = false;
                 output.Error = StatusCodeAPI.InternalServer;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebAPIBookStore.Enum;
 
 namespace WebAPIBookStore.Models;
 
@@ -12,8 +13,7 @@ public class Order
 
     public int? UserAdminId { get; set; }
 
-    [MaxLength(10)]
-    public string Status { get; set; } = null!;
+    public OrderStatus Status { get; set; }
 
     public User User { get; set; } = null!;
 

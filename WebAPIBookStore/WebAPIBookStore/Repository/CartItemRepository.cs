@@ -1,5 +1,6 @@
 ﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 
@@ -27,7 +28,7 @@ namespace WebAPIBookStore.Repository
 
         public bool DeleteCartItem(CartItem deleteCartItem)
         {
-            if (deleteCartItem.Status == "Paid")
+            if (deleteCartItem.Status == CartItemStatus.Paid)
                 return false;
 
             _context.Remove(deleteCartItem);
@@ -41,7 +42,7 @@ namespace WebAPIBookStore.Repository
 
         public List<CartDetail> GetCartItemByUserId(int userId)
         {
-            var cartItems = _context.CartItems.Where(c => c.UserId == userId && c.Status == "UnPaid").ToList();
+            var cartItems = _context.CartItems.Where(c => c.UserId == userId && c.Status == CartItemStatus.UnPaid).ToList();
             var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
                 new CartDetail{
                 Name = p.Name,
@@ -54,7 +55,7 @@ namespace WebAPIBookStore.Repository
 
         public List<CartDetail> GetCartItemByOrderId(int orderId)
         {
-            var cartItems = _context.CartItems.Where(c => c.OrderId == orderId && c.Status == "Paid").ToList();
+            var cartItems = _context.CartItems.Where(c => c.OrderId == orderId && c.Status == CartItemStatus.Paid).ToList();
             var kq = cartItems.Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) =>
                 new CartDetail{
                 Name = p.Name,

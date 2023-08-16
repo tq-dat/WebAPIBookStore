@@ -22,12 +22,12 @@ namespace WebBookStore
                     new CartItem()
                     {
                         QuantityOfProduct = 2,
-                        Status = "UnPaid",
+                        Status = CartItemStatus.UnPaid,
                         Order = new Order()
                         {
                             DateOrder = new DateTime(2023,7,24),
                             UserAdminId = null,
-                            Status = "wait"
+                            Status = OrderStatus.Wait
 
                         },
                         Product = new Product()

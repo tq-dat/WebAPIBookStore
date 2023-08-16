@@ -2,8 +2,6 @@
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
-using WebAPIBookStore.Interfaces;
-using WebAPIBookStore.Models;
 using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
