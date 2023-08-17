@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
 {
@@ -10,122 +10,87 @@ namespace WebAPIBookStore.UseCase
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private readonly IUseCaseOutput _useCaseOutput;
 
         public CategoryUseCase(
             ICategoryRepository categoryRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IUseCaseOutput useCaseOutput)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
+            _useCaseOutput = useCaseOutput;
         }
 
         public Output Get()
         {
-            var output = new Output();
             var categories = _categoryRepository.GetCategories();
             if (!categories.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found categories";
+                return _useCaseOutput.NotFound("Not found categories");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<CategoryDto>>(categories);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<CategoryDto>>(categories));
         }
 
         public Output GetById(int id)
         {
-            var output = new Output();
             var category = _categoryRepository.GetCategory(id);
             if (category == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found category";
+                return _useCaseOutput.NotFound("Not found categoryId");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<CategoryDto>(category);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<CategoryDto>(category));
         }
 
         public Output Post(CategoryDto categoryDto)
         {
-            var output = new Output();
             var category = _categoryRepository.GetCategories().FirstOrDefault(c => c.Name.Trim().ToUpper() == categoryDto.Name.Trim().ToUpper());
             if (category != null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.UnprocessableEntity;
-                output.Message = "Category already exists";
-                return output;
+                return _useCaseOutput.NotFound("Category already exists");
             }
 
             var categoryMap = _mapper.Map<Category>(categoryDto);
             if (!_categoryRepository.CreateCategory(categoryMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<CategoryDto>(categoryMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<CategoryDto>(categoryMap));
         }
 
         public Output Put(CategoryDto categoryDto)
         {
-            var output = new Output();
             var category = _categoryRepository.GetCategory(categoryDto.Id);
             if (category == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found category";
-                return output;
+                return _useCaseOutput.NotFound("Not found category");
             }
 
             if (!_categoryRepository.UpdateCategory(category,categoryDto.Name))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = category;
-            return output;
+            return _useCaseOutput.Success(category);
         }
 
         public Output Delete(int id)
         {
-            var output = new Output();
             var deleteCategory = _categoryRepository.GetCategory(id);
             if (deleteCategory == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found category";
-                return output;
+                return _useCaseOutput.NotFound("Not found category");
             }
-
 
             if (!_categoryRepository.DeleteCategory(deleteCategory))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<CategoryDto>(deleteCategory);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<CategoryDto>(deleteCategory));
         }
     }
 }

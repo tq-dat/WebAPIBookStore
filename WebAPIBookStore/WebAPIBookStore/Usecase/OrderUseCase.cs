@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
 {
@@ -13,104 +13,76 @@ namespace WebAPIBookStore.UseCase
         private readonly IOrderRepository _orderRepository;
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IMapper _mapper;
+        private readonly IUseCaseOutput _useCaseOutput;
 
         public OrderUseCase(
             IOrderRepository orderRepository,
             IUserRepository userRepository,
             ICartItemRepository cartItemRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IUseCaseOutput useCaseOutput)
         {
             _userRepository = userRepository;
             _orderRepository = orderRepository;
             _cartItemRepository = cartItemRepository;
             _mapper = mapper;
+            _useCaseOutput = useCaseOutput;
         }
 
         public Output Get()
         {
-            var output = new Output();
             var orders = _orderRepository.GetOrders();
             if (orders == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found order");
             }
 
-            output.Success = true;
-            output.Data = orders; 
-            return output;
+            return _useCaseOutput.Success(orders);
         }
 
         public Output GetById(int id)
         {
-            var output = new Output();
             var order = _orderRepository.GetOrder(id);
             if (order == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found order");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<OrderDto>(order);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<OrderDto>(order));
         }
 
         public Output GetByStatus(OrderStatus status)
         {
-            var output = new Output();
             var orders = _orderRepository.GetOrderByStatus(status);
             if (!orders.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found order");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<OrderDto>>(orders);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<OrderDto>>(orders));
         }
 
         public Output GetByUserId(int userId)
         {
-            var output = new Output();
             var orders = _orderRepository.GetOrderByUserId(userId);
             if (!orders.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found order");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<OrderDto>>(orders);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<OrderDto>>(orders));
         }
 
         public Output Post(OrderCreate orderCreate)
         {
-            var output = new Output();
             if (!orderCreate.CartItemIds.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "No data input";
-                return output;
+                return _useCaseOutput.InternalServer("No data input");
             }
 
             if (!_userRepository.UserExists(orderCreate.UserId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found user";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
 
             List<CartItem> cartItems = new List<CartItem>();
@@ -119,18 +91,12 @@ namespace WebAPIBookStore.UseCase
                 var cartItem = _cartItemRepository.GetCartItem(id);
                 if (cartItem == null)
                 {
-                    output.Success = false;
-                    output.Error = StatusCodeAPI.NotFound;
-                    output.Message = "Not found cartItemId";
-                    return output;
+                    return _useCaseOutput.NotFound("Not found cartItemId");
                 }
 
                 if (cartItem.Status == CartItemStatus.Paid)
                 {
-                    output.Success = false;
-                    output.Error = StatusCodeAPI.InternalServer;
-                    output.Message = "Data in cartItem not true";
-                    return output;
+                    return _useCaseOutput.InternalServer("Data in cartItem not true");
                 }
                   
                 cartItems.Add(cartItem);
@@ -139,56 +105,36 @@ namespace WebAPIBookStore.UseCase
             var orderMap = _mapper.Map<Order>(orderCreate.OrderDto);
             if (!_orderRepository.CreateOrder(cartItems, orderMap, orderCreate.UserId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = orderCreate;
-            return output;
+            return _useCaseOutput.Success(orderCreate);
         }
 
         public Output Put(OrderUpdate input)
         {
-            var output = new Output();
             var orderUpdate = _orderRepository.GetOrder(input.OrderId);
             if (orderUpdate == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found orderId";
-                return output;
+                return _useCaseOutput.NotFound("Not found orderId");
             }
 
             if (!_userRepository.ManageExists(input.ManageId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found manageId";
-                return output;
+                return _useCaseOutput.NotFound("Not found manageId");
             }
 
             if (input.Status != OrderStatus.Cancel || input.Status != OrderStatus.Success)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Account has no access permission";
-                return output;
+                return _useCaseOutput.InternalServer("Account has no access permission");
             }
 
             if (!_orderRepository.UpdateOrder(orderUpdate, input.Status, input.ManageId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = orderUpdate;
-            return output;
+            return _useCaseOutput.Success(orderUpdate);
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
 {
@@ -11,156 +11,108 @@ namespace WebAPIBookStore.UseCase
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IUseCaseOutput _useCaseOutput;
 
         public UserUseCase(
             IUserRepository userRepository, 
-            IMapper mapper)
+            IMapper mapper,
+            IUseCaseOutput useCaseOutput)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _useCaseOutput = useCaseOutput;
         }
 
         public Output GetByRole(Role role)
         {
-            var output = new Output();
             var users = _userRepository.GetUsersByRole(role);
             if (!users.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found users";
-                return output;
+                return _useCaseOutput.NotFound("Not found users");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<UserDto>>(users);
-            return output;            
+            return _useCaseOutput.Success(_mapper.Map<List<UserDto>>(users));          
         }
 
         public Output GetById(int id)
         {
-            var output = new Output();
             var user = _userRepository.GetUser(id);
             if (user == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found user";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<UserDto>(user);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<UserDto>(user));
         }
 
         public Output GetByName(string name) 
         {
-            var output = new Output();
             var users = _userRepository.GetUsersByName(name);
             if (!users.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found users";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<UserDto>(users);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<UserDto>(users));
         }
 
         public Output Login(UserLogin userLogin)
         {
-            var output = new Output();
             if (!_userRepository.UserExists(userLogin))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found user";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
 
-            output.Success = true;
-            output.Data = userLogin;
-            return output;
+            return _useCaseOutput.Success(userLogin);
         }
 
         public Output SignUp(UserDto userDto)
         {
-            var output = new Output();
             var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == userDto.UserName.Trim().ToUpper() || c.Email == userDto.Email);
             if (user != null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.UnprocessableEntity;
-                output.Message = "User already exists";
-                return output;
+                return _useCaseOutput.UnprocessableEntity("User already exists");
             }
 
             var userMap = _mapper.Map<User>(userDto);
             if (!_userRepository.CreateUser(userMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<UserDto>(userMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<UserDto>(userMap));
         }
 
         public Output Put(UserDto userInput)
         {
-            var output = new Output();
             var user = _userRepository.GetUser(userInput.Id);
             if (user == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found user";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
             var userMap = _mapper.Map<User>(userInput);
             if (!_userRepository.UpdateUser(user, userMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<UserDto>(userMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<UserDto>(userMap));
         }
 
         public Output Delete(int id)
         {
-            var output = new Output();
             var deleteUser = _userRepository.GetUser(id);
             if (deleteUser == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found user";
-                return output;
+                return _useCaseOutput.NotFound("Not found user");
             }
 
             if (!_userRepository.DeleteUser(deleteUser))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<UserDto>(deleteUser);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<UserDto>(deleteUser));
         }
     }
 }

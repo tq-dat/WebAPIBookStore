@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
 {
@@ -13,36 +13,33 @@ namespace WebAPIBookStore.UseCase
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IUseCaseOutput _useCaseOutput;
 
         public CartItemUseCase(
             ICartItemRepository cartItemRepository,
             IUserRepository userRepository,
             IOrderRepository orderRepository,
             IProductRepository productRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IUseCaseOutput useCaseOutput)
         {
             _productRepository = productRepository;
             _orderRepository = orderRepository;
             _cartItemRepository = cartItemRepository;
             _userRepository = userRepository;
             _mapper = mapper;
+            _useCaseOutput = useCaseOutput;
         }
 
         public Output Get()
         {
-            var output = new Output();
             var cartItems = _cartItemRepository.GetCartItems();
             if (!cartItems.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found cartitem";
-                return output;
+                return _useCaseOutput.NotFound("Not found cartitem");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<CartItemDto>>(cartItems);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<CartItemDto>>(cartItems));
         }
 
         public Output GetByOrderId(int orderId)
@@ -50,132 +47,86 @@ namespace WebAPIBookStore.UseCase
             var output = new Output();
             if (!_orderRepository.OrderExists(orderId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found orderId");
             }
 
             var cartItems = _cartItemRepository.GetCartItemByOrderId(orderId);
             if (!cartItems.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found any cartitem in order";
-                return output;
+                return _useCaseOutput.NotFound("Not found any cartitem in order");
             }
 
-            output.Success = true;
-            output.Data = cartItems;
-            return output;
+            return _useCaseOutput.Success(cartItems);
         }
 
         public Output GetByUserId(int userId)
         {
-            var output = new Output();
             if (!_userRepository.UserExists(userId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found order";
-                return output;
+                return _useCaseOutput.NotFound("Not found order");
             }
 
             var cartItems = _cartItemRepository.GetCartItemByUserId(userId);
             if (!cartItems.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found any cartitem for user";
-                return output;
+                return _useCaseOutput.NotFound("Not found any cartitem for user");
             }
 
-            output.Success = true;
-            output.Data = cartItems;
-            return output;
+            return _useCaseOutput.Success(cartItems);
         }
 
         public Output Post(CartItemDto cartItemDto)
         {
-            var output = new Output();
             if (!_userRepository.UserExists(cartItemDto.UserId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found userId";
-                return output;
+                return _useCaseOutput.NotFound("Not found userId");
             }
 
             if (!_productRepository.ProductExists(cartItemDto.ProductId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found productId";
-                return output;
+                return _useCaseOutput.NotFound("Not found productId");
             }
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemDto);
             if (!_cartItemRepository.CreateCartItem(cartItemMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<CartItemDto>(cartItemMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<CartItemDto>(cartItemMap));
         }
 
         public Output Put(CartItemDto cartItemInput)
         {
-            var output = new Output();
             var cartItemUpdate = _cartItemRepository.GetCartItem(cartItemInput.Id);
             if (cartItemUpdate == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found cartItem";
-                return output;
+                return _useCaseOutput.NotFound("Not found cartItem");
             }
 
             var cartItemMap = _mapper.Map<CartItem>(cartItemInput);
             if (!_cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
-            output.Success = true;
-            output.Data = _mapper.Map<CartItemDto>(cartItemUpdate);
-            return output;
+
+            return _useCaseOutput.Success(_mapper.Map<CartItemDto>(cartItemUpdate));
         }
 
         public Output Delete(int id)
         {
-            var output = new Output();
             var deleteCartItem = _cartItemRepository.GetCartItem(id);
             if (deleteCartItem == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found cartItem";
-                return output;
+                return _useCaseOutput.NotFound("Not found cartItem");
             }
 
             if (!_cartItemRepository.DeleteCartItem(deleteCartItem))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<CartItemDto>(deleteCartItem);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<CartItemDto>(deleteCartItem));
         }
     }
 }
