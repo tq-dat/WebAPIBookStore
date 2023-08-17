@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
 {
@@ -11,177 +11,122 @@ namespace WebAPIBookStore.UseCase
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private readonly IUseCaseOutput _useCaseOutput;
 
         public ProductUseCase(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IUseCaseOutput useCaseOutput)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
+            _useCaseOutput = useCaseOutput;
         }
 
         public Output Get()
         {
             var products = _productRepository.GetProducts();
-            var output = new Output();
             if (!products.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found product";
-                return output;
+                return _useCaseOutput.NotFound("Not found product");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<ProductDto>>(products);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<ProductDto>>(products));
         }
 
         public Output GetById(int id)
         {
             var product = _productRepository.GetProduct(id);
-            var output = new Output();
             if (product == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found productId";
-                return output;
+                return _useCaseOutput.NotFound("Not found productId");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<ProductDto>(product);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<ProductDto>(product));
         }
 
         public Output GetByCategory(int categoryId)
         {
-            var output = new Output();
             if (!_categoryRepository.CategoryExists(categoryId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found categoryId";
-                return output;
+                return _useCaseOutput.NotFound("Not found categoryId");
             }
 
             var products = _productRepository.GetProductsByCategory(categoryId);
             if (!products.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found product";
-                return output;
+                return _useCaseOutput.NotFound("Not found product");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<ProductDto>>(products);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<ProductDto>>(products));
         }
 
         public Output GetByName(string name)
         {
-            var output = new Output();
             var products = _productRepository.GetProductsByName(name);
             if (!products.Any())
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found product";
-                return output;
+                return _useCaseOutput.NotFound("Not found product");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<List<ProductDto>>(products);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<List<ProductDto>>(products));
         }
 
         public Output Post(ProductCreate productCreate)
         {
-
-            var output = new Output();
             if (!_categoryRepository.CategoryExists(productCreate.CategoryId))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found categoryId";
-                return output;
+                return _useCaseOutput.NotFound("Not found categoryId");
             }
 
             var product = _productRepository.GetProducts().FirstOrDefault(c => c.Name.Trim().ToUpper() == productCreate.ProductDto.Name.Trim().ToUpper());
             if (product != null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.UnprocessableEntity;
-                output.Message = "Product already exists";
-                return output;
+                return _useCaseOutput.UnprocessableEntity("Product already exists");
             }
 
             var productMap = _mapper.Map<Product>(productCreate.ProductDto);
             if (!_productRepository.CreateProduct(productCreate.CategoryId, productMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<ProductDto>(productMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<ProductDto>(productMap));
         }
 
         public Output Put(ProductDto product) 
         {
-            var output = new Output();
             var productUpdate = _productRepository.GetProduct(product.Id);
             if (productUpdate == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found productId";
-                return output;
+                return _useCaseOutput.NotFound("Not found productId");
             }
 
             var productMap = _mapper.Map<Product>(product);
             if (!_productRepository.UpdateProduct(productUpdate, productMap))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<ProductDto>(productMap);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<ProductDto>(productMap));
         }
 
         public Output Delete(int id)
         {
-            var output = new Output();
             var product = _productRepository.GetProduct(id);
             if (product == null)
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.NotFound;
-                output.Message = "Not found productId";
-                return output;
+                return _useCaseOutput.Success("Not found productId");
             }
 
             if (!_productRepository.DeleteProduct(product))
             {
-                output.Success = false;
-                output.Error = StatusCodeAPI.InternalServer;
-                output.Message = "Something went wrong while saving";
-                return output;
+                return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            output.Success = true;
-            output.Data = _mapper.Map<ProductDto>(product);
-            return output;
+            return _useCaseOutput.Success(_mapper.Map<ProductDto>(product));
         }
     }
 }

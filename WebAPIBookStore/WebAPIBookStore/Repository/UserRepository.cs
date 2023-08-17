@@ -73,9 +73,13 @@ namespace WebAPIBookStore.Repository
             return false;
         }
 
-        public bool UpdateUser(User user)
+        public bool UpdateUser(User userUpdate, User userInput)
         {
-            _context.Update(user);
+            userUpdate.UserName = userInput.UserName;
+            userUpdate.Role = userInput.Role;
+            userUpdate.Address = userInput.Address;
+            userUpdate.Password = userInput.Password;
+            _context.Update(userUpdate);
             return Save();
         }
 

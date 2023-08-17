@@ -1,8 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
-using WebAPIBookStore.Interfaces;
-using WebAPIBookStore.Models;
+using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -10,61 +9,31 @@ namespace WebAPIBookStore.Controllers
     [ApiController]
     public class CartItemController : ControllerBase
     {
-        private readonly IProductRepository _productRepository;
-        private readonly IOrderRepository _orderRepository;
-        private readonly ICartItemRepository _cartItemRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
-
-        public CartItemController(
-            ICartItemRepository cartItemRepository,
-            IUserRepository userRepository,
-            IOrderRepository orderRepository,
-            IProductRepository productRepository,
-            IMapper mapper)
+        private readonly CartItemUseCase _cartItemUseCase;
+        public CartItemController(CartItemUseCase cartItemUseCase)
         {
-            _productRepository = productRepository;
-            _orderRepository = orderRepository;
-            _cartItemRepository = cartItemRepository;
-            _userRepository = userRepository;
-            _mapper = mapper;
+            _cartItemUseCase = cartItemUseCase;
         }
 
         [HttpGet]
         public IActionResult GetCartItems()
         {
-            var cartItems = _cartItemRepository.GetCartItems();
-            if (cartItems.Count <= 0)
-                return NotFound();
-
-            var cartItemMaps = _mapper.Map<List<CartItemDto>>(cartItems);
-            return ModelState.IsValid ? Ok(cartItemMaps) : BadRequest(ModelState);
+            var output = _cartItemUseCase.Get();
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("Order")]
         public IActionResult GetCartItemByOrderId([FromQuery] int orderId)
         {
-            if (!_orderRepository.OrderExists(orderId))
-                return NotFound("Not found order");
-
-            var cartItems = _cartItemRepository.GetCartItemByOrderId(orderId);
-            if (cartItems.Count <= 0)
-                return NotFound();
-
-            return ModelState.IsValid ? Ok(cartItems) : BadRequest(ModelState);
+            var output = _cartItemUseCase.GetByOrderId(orderId);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("User")]
         public IActionResult GetCartItemByUserId([FromQuery] int userId)
         {
-            if (!_userRepository.UserExists(userId))
-                return NotFound("Not found user");
-
-            var cartItems = _cartItemRepository.GetCartItemByUserId(userId);
-            if (cartItems.Count <= 0)
-                return NotFound();
-
-            return ModelState.IsValid ? Ok(cartItems) : BadRequest(ModelState);
+            var output = _cartItemUseCase.GetByUserId(userId);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost]
@@ -73,14 +42,20 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.UserExists(cartItemDto.UserId))
-                return NotFound("Not found user");
+            var output = _cartItemUseCase.Post(cartItemDto);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            if (!_productRepository.ProductExists(cartItemDto.ProductId))
-                return NotFound("Not found product");
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
 
-            var cartItemMap = _mapper.Map<CartItem>(cartItemDto);
-            return _cartItemRepository.CreateCartItem(cartItemMap) ? Ok(cartItemMap) : BadRequest(ModelState);
+            return Ok(output);
         }
 
         [HttpPut]
@@ -89,22 +64,39 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cartItemUpdate = _cartItemRepository.GetCartItem(cartItemInput.Id);
-            if (cartItemUpdate == null)
-                return NotFound("Not found cartItem");
+            var output = _cartItemUseCase.Put(cartItemInput);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            var cartItemMap = _mapper.Map<CartItem>(cartItemInput);
-            return _cartItemRepository.UpdateCartItem(cartItemMap, cartItemUpdate) ? Ok(cartItemUpdate) : BadRequest(ModelState);  
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
+
+            return Ok(output);
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteCartItem([FromRoute] int id)
         {
-            var deleteCartItem = _cartItemRepository.GetCartItem(id);
-            if (deleteCartItem == null)
-                return NotFound();
+            var output = _cartItemUseCase.Delete(id);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            return _cartItemRepository.DeleteCartItem(deleteCartItem) ? Ok(deleteCartItem) : BadRequest(ModelState);
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
+
+            return Ok(output);
         }
     }
 }

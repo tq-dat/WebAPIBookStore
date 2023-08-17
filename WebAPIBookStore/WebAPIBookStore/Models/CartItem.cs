@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WebAPIBookStore.Enum;
+﻿using WebAPIBookStore.Enum;
 
 namespace WebAPIBookStore.Models;
 

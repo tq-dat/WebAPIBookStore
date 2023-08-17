@@ -1,9 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
-using WebAPIBookStore.Interfaces;
-using WebAPIBookStore.Models;
+using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
 {
@@ -11,51 +10,32 @@ namespace WebAPIBookStore.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
-
-        public UserController(
-            IUserRepository userRepository, 
-            IMapper mapper) 
+        private readonly UserUseCase _userUseCase;
+        public UserController(UserUseCase userUseCase)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
+            _userUseCase = userUseCase;
         }
 
         [HttpGet("Role")]
         public IActionResult GetUsersByRole([FromQuery] Role role)
         {
-            var users = _userRepository.GetUsersByRole(role);
-            if (users.Count <= 0)
-                return NotFound();
-
-            var userMaps = _mapper.Map<List<UserDto>>(users);
-            if (userMaps.Count <= 0)
-                return NotFound();
-
-            return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
+            var output = _userUseCase.GetByRole(role);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetUserByUserId([FromRoute] int id) 
+        public IActionResult GetUserByUserId([FromRoute] int id)
         {
-            var user = _userRepository.GetUser(id);
-            if (user == null) 
-                return NotFound();
 
-            var userMap = _mapper.Map<UserDto>(user);
-            return ModelState.IsValid ? Ok(userMap) : BadRequest(ModelState);
+            var output = _userUseCase.GetById(id);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("SearchUser")]
         public IActionResult GetUsersByName([FromQuery] string name)
         {
-            var users = _userRepository.GetUsersByName(name);
-            if (users.Count <= 0)
-                return NotFound();
-
-            var userMaps = _mapper.Map<List<UserDto>>(users);
-            return ModelState.IsValid ? Ok(userMaps) : BadRequest(ModelState);
+            var output = _userUseCase.GetByName(name);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost("Login")]
@@ -64,7 +44,8 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return _userRepository.UserExists(userLogin) ? Ok(userLogin) : NotFound(ModelState);      
+            var output = _userUseCase.Login(userLogin);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost("SignUp")]
@@ -73,38 +54,61 @@ namespace WebAPIBookStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == userCreate.UserName.Trim().ToUpper() || c.Email == userCreate.Email);
-            if (user != null)
+            var output = _userUseCase.SignUp(userCreate);
+            if (!output.Success)
             {
-                ModelState.AddModelError("", "Username or email already exists");
-                return StatusCode(422, ModelState);
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.UnprocessableEntity:
+                        return StatusCode(422, output);
+
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
             }
 
-            var userMap = _mapper.Map<User>(userCreate);
-            return _userRepository.CreateUser(userMap) ? Ok(userMap) : BadRequest(ModelState);
+            return Ok(output);
         }
 
         [HttpPut]
-        public IActionResult UpdateUser([FromBody] UserDto userUpdate) 
+        public IActionResult UpdateUser([FromBody] UserDto userUpdate)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (_userRepository.UserExists(userUpdate.Id))
-                return NotFound();
+            var output = _userUseCase.Put(userUpdate);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            var userMap = _mapper.Map<User>(userUpdate);
-            return _userRepository.UpdateUser(userMap) ? Ok(userMap) : BadRequest(ModelState);
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
+
+            return Ok(output);
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteUser([FromRoute] int id)
         {
-            var deleteUser = _userRepository.GetUser(id);
-            if (deleteUser == null)
-                return NotFound();
+            var output = _userUseCase.Delete(id);
+            if (!output.Success)
+            {
+                switch (output.Error)
+                {
+                    case StatusCodeAPI.NotFound:
+                        return NotFound(output);
 
-            return _userRepository.DeleteUser(deleteUser) ? Ok(deleteUser) : BadRequest(ModelState);
+                    case StatusCodeAPI.InternalServer:
+                        return BadRequest(output);
+                }
+            }
+
+            return Ok(output);
         }
     }
 }

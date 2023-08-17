@@ -1,4 +1,5 @@
 ﻿using WebAPIBookStore.Data;
+using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
@@ -9,7 +10,8 @@ namespace WebAPIBookStore.Repository
     {
         private readonly DataContext _context;
 
-        public OrderRepository(DataContext context) {
+        public OrderRepository(DataContext context)
+        {
             _context = context;
         }
 
@@ -30,7 +32,7 @@ namespace WebAPIBookStore.Repository
 
         public Order? GetOrder(int id)
         {
-           return _context.Orders.FirstOrDefault(p => p.Id == id);
+            return _context.Orders.FirstOrDefault(p => p.Id == id);
         }
 
         public ICollection<Order> GetOrderByStatus(OrderStatus status)
@@ -44,9 +46,28 @@ namespace WebAPIBookStore.Repository
             return _context.Orders.Where(p => p.UserId == userId).ToList();
         }
 
-        public ICollection<Order> GetOrders()
+        public List<OrderOutput> GetOrders()
         {
-            return _context.Orders.ToList();
+            var orders = _context.Orders.ToList();
+            var kq = orders.Join(_context.Users, o => o.UserId, u => u.Id, (o, u) =>
+                new OrderOutput {
+                    Id = o.Id,
+                    DateOrder = o.DateOrder,
+                    UserId = o.UserId,
+                    UserName = u.UserName,
+                    AdminId = o.UserAdminId,
+                    AdminName = o.UserAdminId != null? _context.Users.Where(x => x.Id == o.UserAdminId).Select(x => x.UserName).ToString() : null,
+                    Status = o.Status,
+                    Items = _context.CartItems.Where(c => c.OrderId == o.Id).Join(_context.Products, c => c.ProductId, p => p.Id, (c, p) => 
+                    new OrderItem{
+                        ProductId = p.Id,
+                        ProductName = p.Name,
+                        QuantityOfProduct = c.QuantityOfProduct,
+                        PriceOfProduct = p.Price
+                    }).ToList(),
+                }).ToList();
+
+            return kq;
         }
 
         public bool OrderExists(int id)
@@ -59,7 +80,7 @@ namespace WebAPIBookStore.Repository
             var saved = _context.SaveChanges();
             if (saved > 0)
                 return true;
-            
+
             return false;
         }
 

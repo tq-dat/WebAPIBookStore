@@ -1,11 +1,12 @@
-﻿using WebAPIBookStore.Enum;
+﻿using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
 using WebAPIBookStore.Models;
 
 namespace WebAPIBookStore.Interfaces
 {
     public interface IOrderRepository
     {
-        public ICollection<Order> GetOrders();
+        public List<OrderOutput> GetOrders();
         public ICollection<Order> GetOrderByStatus(OrderStatus status);
         public ICollection<Order> GetOrderByUserId(int userId);
         public Order? GetOrder(int id);
