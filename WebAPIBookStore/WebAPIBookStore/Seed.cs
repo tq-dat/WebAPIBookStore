@@ -43,7 +43,6 @@ namespace WebBookStore
                         },
                         User = new User()
                         {
-                            FullName = "Trinh Dat",
                             UserName = "dat123",
                             Password = "dat123",
                             Email = "dat123@gmail.com",

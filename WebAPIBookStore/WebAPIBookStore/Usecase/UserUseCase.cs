@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
+using WebAPIBookStore.Input;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Result;
 using WebAPIBookStore.Usecase;
 
 namespace WebAPIBookStore.UseCase
@@ -56,47 +58,56 @@ namespace WebAPIBookStore.UseCase
             return _useCaseOutput.Success(_mapper.Map<UserDto>(users));
         }
 
-        public Output Login(UserLogin userLogin)
+        public Output Login(LoginInput loginInput)
         {
-            if (!_userRepository.UserExists(userLogin))
-            {
-                return _useCaseOutput.NotFound("Not found user");
-            }
+            var user = _userRepository.GetUserByEmail(loginInput.Email);
+            if (user == null)
+                return _useCaseOutput.NotFound("Email not true");
 
-            return _useCaseOutput.Success(userLogin);
+            if (loginInput.Password != user.Password)
+                return _useCaseOutput.NotFound("Password not true");
+
+            return _useCaseOutput.Success(_mapper.Map<UserOutput>(user));
         }
 
-        public Output SignUp(UserDto userDto)
+        public Output SignUp(SignUpInput signUpInput)
         {
-            var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == userDto.UserName.Trim().ToUpper() || c.Email == userDto.Email);
+            var user = _userRepository.GetUsers().FirstOrDefault(c => c.UserName.Trim().ToUpper() == signUpInput.UserName.Trim().ToUpper() || c.Email == signUpInput.Email);
             if (user != null)
-            {
                 return _useCaseOutput.UnprocessableEntity("User already exists");
-            }
 
-            var userMap = _mapper.Map<User>(userDto);
+            var userMap = _mapper.Map<User>(signUpInput);
+            userMap.Role = Role.User;
+            userMap.EmailVerify = false;
             if (!_userRepository.CreateUser(userMap))
-            {
                 return _useCaseOutput.InternalServer("Something went wrong while saving");
-            }
 
-            return _useCaseOutput.Success(_mapper.Map<UserDto>(userMap));
+            return _useCaseOutput.Success(_mapper.Map<UserOutput>(userMap));
         }
 
-        public Output Put(UserDto userInput)
+        public Output SendOTP(string email)
         {
-            var user = _userRepository.GetUser(userInput.Id);
+            var otp = _userRepository.SendEmailOtp(email);
+            if (otp == null)
+                return _useCaseOutput.InternalServer("Error");
+
+            return _useCaseOutput.Success(otp);
+        }
+
+        public Output Put(UpdateUserInput updateUserInput)
+        {
+            var user = _userRepository.GetUser(updateUserInput.Id);
             if (user == null)
             {
                 return _useCaseOutput.NotFound("Not found user");
             }
-            var userMap = _mapper.Map<User>(userInput);
+            var userMap = _mapper.Map<User>(updateUserInput);
             if (!_userRepository.UpdateUser(user, userMap))
             {
                 return _useCaseOutput.InternalServer("Something went wrong while saving");
             }
 
-            return _useCaseOutput.Success(_mapper.Map<UserDto>(userMap));
+            return _useCaseOutput.Success(_mapper.Map<UserOutput>(userMap));
         }
 
         public Output Delete(int id)
