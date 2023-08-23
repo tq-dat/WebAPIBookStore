@@ -20,7 +20,6 @@ namespace WebAPIBookStore.Helpers
             CreateMap<User, UserOutput>().ReverseMap();
             CreateMap<User, SignUpInput>().ReverseMap();
             CreateMap<User, UpdateUserInput>().ReverseMap();
-            CreateMap<Product, ProductOutput>().ReverseMap();
         }
     }
 }
