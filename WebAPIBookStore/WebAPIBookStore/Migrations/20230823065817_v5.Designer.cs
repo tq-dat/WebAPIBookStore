@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPIBookStore.Data;
 
@@ -10,9 +11,11 @@ using WebAPIBookStore.Data;
 namespace WebAPIBookStore.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230823065817_v5")]
+    partial class v5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,6 +70,26 @@ namespace WebAPIBookStore.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("WebAPIBookStore.Models.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("WebAPIBookStore.Models.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -115,6 +138,9 @@ namespace WebAPIBookStore.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("double");
+
+                    b.Property<int>("PublishYear")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -196,6 +222,17 @@ namespace WebAPIBookStore.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WebAPIBookStore.Models.Image", b =>
+                {
+                    b.HasOne("WebAPIBookStore.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("WebAPIBookStore.Models.Order", b =>
                 {
                     b.HasOne("WebAPIBookStore.Models.User", "User")
@@ -239,6 +276,8 @@ namespace WebAPIBookStore.Migrations
             modelBuilder.Entity("WebAPIBookStore.Models.Product", b =>
                 {
                     b.Navigation("CartItems");
+
+                    b.Navigation("Images");
 
                     b.Navigation("ProductCategories");
                 });

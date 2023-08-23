@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Input;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Result;
 
 namespace WebAPIBookStore.Helpers
 {
@@ -15,6 +17,9 @@ namespace WebAPIBookStore.Helpers
             CreateMap<Order, OrderDto>().ReverseMap();
             CreateMap<User, UserLogin>().ReverseMap();
             CreateMap<CartItem, CartItemCreate>().ReverseMap();
+            CreateMap<User, UserOutput>().ReverseMap();
+            CreateMap<User, SignUpInput>().ReverseMap();
+            CreateMap<User, UpdateUserInput>().ReverseMap();
         }
     }
 }

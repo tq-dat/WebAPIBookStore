@@ -2,6 +2,7 @@
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
 using WebAPIBookStore.Enum;
+using WebAPIBookStore.Input;
 using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
@@ -39,22 +40,22 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] UserLogin userLogin)
+        public IActionResult Login([FromBody] LoginInput loginInput)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _userUseCase.Login(userLogin);
+            var output = _userUseCase.Login(loginInput);
             return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost("SignUp")]
-        public IActionResult SignUp([FromBody] UserDto userCreate)
+        public IActionResult SignUp([FromBody] SignUpInput signUpInput)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _userUseCase.SignUp(userCreate);
+            var output = _userUseCase.SignUp(signUpInput);
             if (!output.Success)
             {
                 switch (output.Error)
@@ -70,13 +71,23 @@ namespace WebAPIBookStore.Controllers
             return Ok(output);
         }
 
-        [HttpPut]
-        public IActionResult UpdateUser([FromBody] UserDto userUpdate)
+        [HttpPost("SendOTP")]
+        public IActionResult SendOTP([FromBody] string email)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _userUseCase.Put(userUpdate);
+            var output = _userUseCase.SendOTP(email);
+            return output.Error != StatusCodeAPI.InternalServer ? Ok(output) : BadRequest(output);
+        }
+
+        [HttpPut]
+        public IActionResult UpdateUser([FromBody] UpdateUserInput updateUserInput)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var output = _userUseCase.Put(updateUserInput);
             if (!output.Success)
             {
                 switch (output.Error)
