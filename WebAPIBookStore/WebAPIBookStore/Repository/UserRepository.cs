@@ -89,8 +89,8 @@ namespace WebAPIBookStore.Repository
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse("trinhdat11371@gmail.com"));
             email.To.Add(MailboxAddress.Parse(address));
-            email.Subject = "OTP";
-            email.Body = new TextPart(TextFormat.Text) { Text = OTP };
+            email.Subject = "Web API";
+            email.Body = new TextPart(TextFormat.Text) { Text = "Mã xác thực của bạn là : " + OTP };
 
             using var smtp = new SmtpClient();
             smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
