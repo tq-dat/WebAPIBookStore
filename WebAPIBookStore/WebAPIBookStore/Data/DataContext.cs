@@ -17,6 +17,7 @@ namespace WebAPIBookStore.Data
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Image> Images { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -17,6 +17,10 @@ public class Product
 
     public double Price { get; set; }
 
+    public int PublishYear { get; set; }
+
+    public ICollection<Image>? Images { get; set; }
+
     public ICollection<ProductCategory>? ProductCategories { get; set; }
 
     public ICollection<CartItem>? CartItems { get; set; }
