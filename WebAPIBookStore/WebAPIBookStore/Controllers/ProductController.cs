@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIBookStore.Consts;
 using WebAPIBookStore.Dto;
+using WebAPIBookStore.Enum;
+using WebAPIBookStore.Input;
 using WebAPIBookStore.UseCase;
 
 namespace WebAPIBookStore.Controllers
@@ -38,19 +40,29 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Search")]
-        public IActionResult GetProduct([FromQuery] string name)
+        public IActionResult GetProduct([FromQuery] string value, [FromQuery] int limit)
         {
-            var output = _productUseCase.GetByName(name);
-            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);   
+            var output = _productUseCase.Search(value, limit);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
+        }
+
+        [HttpGet("Sort")]
+        public IActionResult Sort([FromQuery] bool descending, [FromQuery] SortValue sortValue)
+        {
+            var output = _productUseCase.Sort(descending, sortValue);
+            if (output.Error == StatusCodeAPI.InternalServer)
+                return BadRequest(output);
+
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] ProductCreate productCreate)
+        public IActionResult CreateProduct([FromBody] AddProductInput addProductInput)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _productUseCase.Post(productCreate);
+            var output = _productUseCase.Post(addProductInput);
             if (!output.Success)
             {
                 switch (output.Error)
@@ -70,12 +82,12 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateProduct([FromBody] ProductDto product)
+        public IActionResult UpdateProduct([FromBody] UpdateProductInput updateProductInput)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var output = _productUseCase.Put(product);
+            var output = _productUseCase.Put(updateProductInput);
             if (!output.Success)
             {
                 switch (output.Error)

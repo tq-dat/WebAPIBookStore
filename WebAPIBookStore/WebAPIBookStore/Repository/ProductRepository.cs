@@ -1,7 +1,9 @@
 ﻿using WebAPIBookStore.Data;
 using WebAPIBookStore.Enum;
+using WebAPIBookStore.Input;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
+using WebAPIBookStore.Result;
 
 namespace WebAPIBookStore.Repository
 {
@@ -9,23 +11,40 @@ namespace WebAPIBookStore.Repository
     {
         private readonly DataContext _context;
 
-        public ProductRepository(DataContext context) 
+        public ProductRepository(DataContext context)
         {
             _context = context;
         }
-        public Product? GetProduct(int id)
+        public ProductOutput? GetProductReturnProductOutput(int id)
         {
-            return _context.Products.FirstOrDefault(p => p.Id == id);
+            return _context.Products.Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).FirstOrDefault(p => p.Id == id);
         }
 
-        public ICollection<Product> GetProductsByName(string name)
+        public ICollection<ProductOutput> GetProducts()
         {
-            return _context.Products.Where(p => p.Name.Contains(name)).ToList();
-        }
+            var products = _context.Products.Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).ToList();
 
-        public ICollection<Product> GetProducts()
-        {
-            return _context.Products.Where(p => p.Name != "Deleted").ToList();
+            return products;
         }
 
         public bool ProductExists(int prodId)
@@ -33,17 +52,39 @@ namespace WebAPIBookStore.Repository
             return _context.Products.Any(p => p.Id == prodId);
         }
 
-        public bool CreateProduct(int categoryId, Product product)
+        public bool CreateProduct(AddProductInput addProductInput)
         {
-            var category = _context.Categories.FirstOrDefault(p => p.Id == categoryId);
-            var productCategory = new ProductCategory()
+            var product = new Product
             {
-                Product = product,
-                Category = category
+                Name = addProductInput.Name,
+                Description = addProductInput.Description,
+                Author = addProductInput.Author,
+                Price = addProductInput.Price,
+                PublishYear = addProductInput.PublishYear
             };
 
-            _context.Add(productCategory);
             _context.Add(product);
+            foreach (int id in addProductInput.CategoryIds)
+            {
+                var category = _context.Categories.FirstOrDefault(p => p.Id == id);
+                var productCategory = new ProductCategory()
+                {
+                    Product = product,
+                    Category = category
+                };
+                _context.Add(productCategory);
+            }
+
+            foreach (string Url in addProductInput.ImageURL)
+            {
+                var image = new Image
+                {
+                    Product = product,
+                    URL = Url
+                };
+                _context.Add(image);
+            }
+
             return Save();
         }
 
@@ -52,16 +93,30 @@ namespace WebAPIBookStore.Repository
             var saved = _context.SaveChanges();
             if (saved > 0)
                 return true;
-            
+
             return false;
         }
 
-        public bool UpdateProduct(Product productUpdate, Product product)
+        public bool UpdateProduct(Product productUpdate, UpdateProductInput updateProductInput)
         {
-            productUpdate.Name = product.Name;
-            productUpdate.Description = product.Description;
-            productUpdate.Author = product.Author;
-            productUpdate.Price = product.Price;
+            productUpdate.Name = updateProductInput.Name;
+            productUpdate.Description = updateProductInput.Description;
+            productUpdate.Author = updateProductInput.Author;
+            productUpdate.Price = updateProductInput.Price;
+            var images = _context.Images.Where(p => p.ProductId == updateProductInput.Id).ToList();
+            foreach (var image in images)
+            {
+                _context.Remove(image);
+            }
+            foreach (var url in updateProductInput.ImageURL)
+            {
+                var image = new Image
+                {
+                    URL = url,
+                    ProductId = updateProductInput.Id
+                };
+                _context.Add(image);
+            }
             _context.Update(productUpdate);
             return Save();
         }
@@ -80,14 +135,114 @@ namespace WebAPIBookStore.Repository
                 _context.Remove(cartItem);
             }
 
+            var images = _context.Images.Where(p => p.ProductId == productDelete.Id).ToList();
+            foreach(var image in images)
+            {
+                _context.Remove(image);
+            }
+
             productDelete.Name = "Deleted";
             _context.Update(productDelete);
-            return Save();  
+            return Save();
         }
 
-        public ICollection<Product?> GetProductsByCategory(int categoryId)
+        public ICollection<ProductOutput> GetProductsByCategory(int categoryId)
         {
-            return _context.ProductCategories.Where(pc => pc.CategoryId == categoryId).Select(p => p.Product).ToList();
+            var products = _context.ProductCategories.Where(pc => pc.CategoryId == categoryId).Join(_context.Products, pc => pc.ProductId, p => p.Id, (pc ,p) => p).ToList();
+            var output = products.Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).ToList();
+
+            return output;
+        }
+
+        public ICollection<ProductOutput> SortUp(string value)
+        {
+            var products = _context.Products.OrderBy(p => value).Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).ToList();
+
+            return products;
+        }
+
+        public ICollection<ProductOutput> SortDown(string value)
+        {
+            var products = _context.Products.OrderByDescending(p => value).Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).ToList();
+
+            return products;
+        }
+
+        public ICollection<ProductOutput> Search(string value, int limit)
+        {
+            if (limit == 0)
+            {
+                var products = _context.Products.Where(
+                    p => p.Name.Contains(value) ||
+                    p.Author.Contains(value) ||
+                    p.PublishYear.ToString().Contains(value)
+                ).Select(p => new ProductOutput
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Author = p.Author,
+                    Price = p.Price,
+                    PublishYear = p.PublishYear,
+                    ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                    CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+                }).ToList();
+
+                return products;
+            }
+
+            var productLimited = _context.Products.Where(
+                p => p.Name.Contains(value) ||
+                p.Author.Contains(value) ||
+                p.PublishYear.ToString().Contains(value)
+            ).Select(p => new ProductOutput
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Author = p.Author,
+                Price = p.Price,
+                PublishYear = p.PublishYear,
+                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
+                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
+            }).Take(limit).ToList();
+
+            return productLimited;
+        }
+
+        public Product? GetProductReturnProduct(int id)
+        {
+            return _context.Products.FirstOrDefault(p => p.Id == id);
         }
     }
 }
