@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj": {}
+    "d:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj": {}
   },
   "projects": {
-    "D:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj": {
+    "d:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj",
+        "projectUniqueName": "d:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj",
         "projectName": "WebAPIBookStore",
-        "projectPath": "D:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj",
+        "projectPath": "d:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore.csproj",
         "packagesPath": "C:\\Users\\TQD\\.nuget\\packages\\",
-        "outputPath": "D:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\obj\\",
+        "outputPath": "d:\\C#\\VisualStudio\\ProJ_Kaopiz\\WebAPIBookStore\\WebAPIBookStore\\WebAPIBookStore\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\TQD\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -44,6 +44,10 @@
             "AutoMapper.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
               "version": "[12.0.1, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.1.0, )"
             },
             "Microsoft.Data.SqlClient": {
               "target": "Package",
