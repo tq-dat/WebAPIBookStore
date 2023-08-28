@@ -40,20 +40,23 @@ namespace WebAPIBookStore.Controllers
         }
 
         [HttpGet("Search")]
-        public IActionResult GetProduct([FromQuery] string value, [FromQuery] int limit)
+        public IActionResult SearchProdcutByOption([FromQuery] string input, [FromQuery] int? limit, [FromQuery] int option)
         {
-            var output = _productUseCase.Search(value, limit);
+            var output = _productUseCase.SearchByOption(input, limit, option); // option 1 : authot, option 2 : puslishYera, default : name
             return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
         }
 
         [HttpGet("Sort")]
-        public IActionResult Sort([FromQuery] bool descending, [FromQuery] SortValue sortValue)
+        public IActionResult Sort([FromBody] SortInput sortInput)
         {
-            var output = _productUseCase.Sort(descending, sortValue);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);  
+
+            var output = _productUseCase.Sort(sortInput);
             if (output.Error == StatusCodeAPI.InternalServer)
                 return BadRequest(output);
 
-            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
+            return Ok(output);
         }
 
         [HttpPost]

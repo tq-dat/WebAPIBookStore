@@ -124,54 +124,22 @@ namespace WebAPIBookStore.UseCase
             return _useCaseOutput.Success(_mapper.Map<ProductDto>(product));
         }
 
-        public Output Sort(bool descending, SortValue sortValue)
+        public Output Sort(SortInput sortInput)
         {
-            if (descending)
-            {
-                switch (sortValue)
-                {
-                    case SortValue.Name:
-                        var product1 = _productRepository.SortDown("Name");
-                        return product1.Any() ? _useCaseOutput.Success(product1) : _useCaseOutput.NotFound("Not found any product");
+            var products = _useCaseOutput.Success(Sort(sortInput));
+            if (products == null)
+                return _useCaseOutput.InternalServer("Input not true");
 
-                    case SortValue.Price:
-                        var product2 = _productRepository.SortDown("Price");
-                        return product2.Any() ? _useCaseOutput.Success(product2) : _useCaseOutput.NotFound("Not found any product");
-
-                    case SortValue.PuslishYear:
-                        var product3 = _productRepository.SortDown("PuslishYear");
-                        return product3.Any() ? _useCaseOutput.Success(product3) : _useCaseOutput.NotFound("Not found any product");
-
-                    default:
-                        return _useCaseOutput.InternalServer("Input not true");
-                }
-            }
-            else
-            {
-                switch (sortValue)
-                {
-                    case SortValue.Name:
-                        var product1 = _productRepository.SortUp("Name");
-                        return product1.Any() ? _useCaseOutput.Success(product1) : _useCaseOutput.NotFound("Not found any product");
-
-                    case SortValue.Price:
-                        var product2 = _productRepository.SortUp("Price");
-                        return product2.Any() ? _useCaseOutput.Success(product2) : _useCaseOutput.NotFound("Not found any product");
-
-                    case SortValue.PuslishYear:
-                        var product3 = _productRepository.SortUp("PuslishYear");
-                        return product3.Any() ? _useCaseOutput.Success(product3) : _useCaseOutput.NotFound("Not found any product");
-
-                    default:
-                        return _useCaseOutput.InternalServer("Input not true");
-                }
-            }
+            return _useCaseOutput.Success(products);
         }
 
-        public Output Search(string value, int limit)
+        public Output SearchByOption(string input, int? limit, int option)
         {
-            var products = _productRepository.Search(value, limit);
-            return products.Any() ? _useCaseOutput.Success(products) : _useCaseOutput.NotFound("Not found any product");
+            var products = _productRepository.SearchByOption(input, limit, option);
+            if (products.Any())
+                return _useCaseOutput.NotFound("Not found product");
+
+            return _useCaseOutput.Success(products);
         }
     }
 }

@@ -14,9 +14,8 @@ namespace WebAPIBookStore.Interfaces
         public bool CreateProduct(AddProductInput addProductInput);
         public bool UpdateProduct(Product productUpdate, UpdateProductInput updateProductInput);
         public bool DeleteProduct(Product productDelete);
-        public ICollection<ProductOutput> SortUp(string value);
-        public ICollection<ProductOutput> SortDown(string value);
-        public ICollection<ProductOutput> Search(string value, int limit);
+        public ICollection<ProductOutput>? SortBy(SortInput sortInput);
+        public ICollection<ProductOutput> SearchByOption(string input, int? limit, int option);
         public bool Save();
     }
 }

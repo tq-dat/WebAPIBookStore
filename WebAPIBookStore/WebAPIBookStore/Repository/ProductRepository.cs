@@ -1,9 +1,11 @@
-﻿using WebAPIBookStore.Data;
+﻿using NuGet.Protocol.Core.Types;
+using WebAPIBookStore.Data;
 using WebAPIBookStore.Enum;
 using WebAPIBookStore.Input;
 using WebAPIBookStore.Interfaces;
 using WebAPIBookStore.Models;
 using WebAPIBookStore.Result;
+using ZstdSharp.Unsafe;
 
 namespace WebAPIBookStore.Repository
 {
@@ -130,80 +132,86 @@ namespace WebAPIBookStore.Repository
             return toProductOutput(products);
         }
 
-        public ICollection<ProductOutput> SortUp(string value)
+        public ICollection<ProductOutput>? SortBy(SortInput sortInput)
         {
-            var products = _context.Products.OrderBy(p => value).Select(p => new ProductOutput
+            if (sortInput.Descending)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Author = p.Author,
-                Price = p.Price,
-                PublishYear = p.PublishYear,
-                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
-                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
-            }).ToList();
-
-            return products;
-        }
-
-        public ICollection<ProductOutput> SortDown(string value)
-        {
-            var products = _context.Products.OrderByDescending(p => value).Select(p => new ProductOutput
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Author = p.Author,
-                Price = p.Price,
-                PublishYear = p.PublishYear,
-                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
-                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
-            }).ToList();
-
-            return products;
-        }
-
-        public ICollection<ProductOutput> Search(string value, int limit)
-        {
-            if (limit == 0)
-            {
-                var products = _context.Products.Where(
-                    p => p.Name.Contains(value) ||
-                    p.Author.Contains(value) ||
-                    p.PublishYear.ToString().Contains(value)
-                ).Select(p => new ProductOutput
+                switch (sortInput.ByValue)
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Author = p.Author,
-                    Price = p.Price,
-                    PublishYear = p.PublishYear,
-                    ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
-                    CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
-                }).ToList();
+                    case 1:
+                        var products1 = _context.Products.OrderByDescending(p => p.Name).ToList();
+                        return toProductOutput(products1);
 
-                return products;
+                    case 2:
+                        var products2 = _context.Products.OrderByDescending(p => p.Price).ToList();
+                        return toProductOutput(products2);
+
+                    case 3:
+                        var products3 = _context.Products.OrderByDescending(p => p.PublishYear).ToList();
+                        return toProductOutput(products3);
+
+                    default:
+                        return null;
+                }
             }
-
-            var productLimited = _context.Products.Where(
-                p => p.Name.Contains(value) ||
-                p.Author.Contains(value) ||
-                p.PublishYear.ToString().Contains(value)
-            ).Select(p => new ProductOutput
+            else
             {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Author = p.Author,
-                Price = p.Price,
-                PublishYear = p.PublishYear,
-                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
-                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
-            }).Take(limit).ToList();
+                switch (sortInput.ByValue)
+                {
+                    case 1:
+                        var products1 = _context.Products.OrderBy(p => p.Name).ToList();
+                        return toProductOutput(products1);
 
-            return productLimited;
+                    case 2:
+                        var products2 = _context.Products.OrderBy(p => p.Price).ToList();
+                        return toProductOutput(products2);
+
+                    case 3:
+                        var products3 = _context.Products.OrderBy(p => p.PublishYear).ToList();
+                        return toProductOutput(products3);
+
+                    default:
+                        return null;
+                }
+            }
+        }
+        
+        public ICollection<ProductOutput> SearchByOption(string input, int? limit, int option)
+        {
+            if (limit.HasValue)
+            {
+                switch (option)
+                {
+                    case 1:
+                        var productByAuthor = _context.Products.Take((int)limit).Where(p => p.Author.Contains(input)).ToList();
+                        return toProductOutput(productByAuthor);
+
+                    case 2:
+                        var productByYear = _context.Products.Take((int)limit).Where(p => p.PublishYear.ToString().Contains(input)).ToList();
+                        return toProductOutput(productByYear);
+
+                    default:
+                        var productByName = _context.Products.Take((int)limit).Where(p => p.Name.Contains(input)).ToList();
+                        return toProductOutput(productByName);
+                }
+            }
+            else
+            {
+                switch (option)
+                {
+                    case 1:
+                        var productByAuthor = _context.Products.Where(p => p.Author.Contains(input)).ToList();
+                        return toProductOutput(productByAuthor);
+
+                    case 2:
+                        var productByYear = _context.Products.Where(p => p.PublishYear.ToString().Contains(input)).ToList();
+                        return toProductOutput(productByYear);
+
+                    default:
+                        var productByName = _context.Products.Where(p => p.Name.Contains(input)).ToList();
+                        return toProductOutput(productByName);
+                }
+            }
         }
 
         public Product? GetProductReturnProduct(int id)
