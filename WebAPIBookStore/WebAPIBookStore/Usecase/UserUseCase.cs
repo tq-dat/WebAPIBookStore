@@ -55,7 +55,7 @@ namespace WebAPIBookStore.UseCase
                 return _useCaseOutput.NotFound("Not found user");
             }
 
-            return _useCaseOutput.Success(_mapper.Map<UserDto>(users));
+            return _useCaseOutput.Success(_mapper.Map<List<UserDto>>(users));
         }
 
         public Output Login(LoginInput loginInput)

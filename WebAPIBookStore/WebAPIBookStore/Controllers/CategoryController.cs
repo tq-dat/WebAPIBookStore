@@ -19,7 +19,7 @@ namespace WebAPIBookStore.Controllers
         public IActionResult GetCategories()
         {
             var output = _categoryUseCase.Get();
-            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output);
+            return output.Error != StatusCodeAPI.NotFound ? Ok(output) : NotFound(output); 
         }
 
         [HttpGet("{id}")]

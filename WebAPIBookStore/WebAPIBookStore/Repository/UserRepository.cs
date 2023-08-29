@@ -70,7 +70,7 @@ namespace WebAPIBookStore.Repository
 
         public bool ManageExists(int manageId)
         {
-            return _context.Users.Any(p => p.Id == manageId && (p.Role == Role.Admin || p.Role == Role.Manage));
+            return _context.Users.Any(p => p.Id == manageId && (p.Role == Role.Admin));
         }
 
         public bool Save()
