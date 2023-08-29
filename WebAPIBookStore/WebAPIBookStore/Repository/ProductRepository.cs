@@ -24,7 +24,7 @@ namespace WebAPIBookStore.Repository
 
         public ICollection<ProductOutput> GetProducts()
         {
-            return toProductOutput(_context.Products.ToList());
+            return toProductOutputs(_context.Products.ToList());
         }
 
         public bool ProductExists(int prodId)
@@ -44,27 +44,10 @@ namespace WebAPIBookStore.Repository
             };
 
             _context.Add(product);
-            foreach (int id in addProductInput.CategoryIds)
-            {
-                var category = _context.Categories.FirstOrDefault(p => p.Id == id);
-                var productCategory = new ProductCategory()
-                {
-                    Product = product,
-                    Category = category
-                };
-                _context.Add(productCategory);
-            }
-
-            foreach (string Url in addProductInput.ImageURL)
-            {
-                var image = new Image
-                {
-                    Product = product,
-                    URL = Url
-                };
-                _context.Add(image);
-            }
-
+            var images = addProductInput.ImageURL.Select(p => new Image { Product = product, URL = p });
+            _context.Add(images);
+            var productCategorys = addProductInput.CategoryIds.Select(p => new ProductCategory { Product = product, Category = _context.Categories.FirstOrDefault(c => c.Id == p) });
+            _context.Add(productCategorys);
             return Save();
         }
 
@@ -84,19 +67,9 @@ namespace WebAPIBookStore.Repository
             productUpdate.Author = updateProductInput.Author;
             productUpdate.Price = updateProductInput.Price;
             var images = _context.Images.Where(p => p.ProductId == updateProductInput.Id).ToList();
-            foreach (var image in images)
-            {
-                _context.Remove(image);
-            }
-            foreach (var url in updateProductInput.ImageURL)
-            {
-                var image = new Image
-                {
-                    URL = url,
-                    ProductId = updateProductInput.Id
-                };
-                _context.Add(image);
-            }
+            _context.Remove(images);
+            var newImages = updateProductInput.ImageURL.Select(_ => new Image { URL = _, ProductId = updateProductInput.Id });
+            _context.Add(newImages);
             _context.Update(productUpdate);
             return Save();
         }
@@ -104,23 +77,11 @@ namespace WebAPIBookStore.Repository
         public bool DeleteProduct(Product productDelete)
         {
             var productCategories = _context.ProductCategories.Where(p => p.ProductId == productDelete.Id).ToList();
-            foreach (var pc in productCategories)
-            {
-                _context.Remove(pc);
-            }
-
+            _context.Remove(productCategories);
             var cartItems = _context.CartItems.Where(p => p.ProductId == productDelete.Id && p.Status == CartItemStatus.UnPaid).ToList();
-            foreach (var cartItem in cartItems)
-            {
-                _context.Remove(cartItem);
-            }
-
+            _context.Remove(cartItems);
             var images = _context.Images.Where(p => p.ProductId == productDelete.Id).ToList();
-            foreach(var image in images)
-            {
-                _context.Remove(image);
-            }
-
+            _context.Remove(images);
             productDelete.Name = "Deleted";
             _context.Update(productDelete);
             return Save();
@@ -129,7 +90,7 @@ namespace WebAPIBookStore.Repository
         public ICollection<ProductOutput> GetProductsByCategory(int categoryId)
         {
             var products = _context.ProductCategories.Where(pc => pc.CategoryId == categoryId).Join(_context.Products, pc => pc.ProductId, p => p.Id, (pc ,p) => p).ToList();
-            return toProductOutput(products);
+            return toProductOutputs(products);
         }
 
         public ICollection<ProductOutput>? SortBy(SortInput sortInput)
@@ -140,15 +101,15 @@ namespace WebAPIBookStore.Repository
                 {
                     case 1:
                         var products1 = _context.Products.OrderByDescending(p => p.Name).ToList();
-                        return toProductOutput(products1);
+                        return toProductOutputs(products1);
 
                     case 2:
                         var products2 = _context.Products.OrderByDescending(p => p.Price).ToList();
-                        return toProductOutput(products2);
+                        return toProductOutputs(products2);
 
                     case 3:
                         var products3 = _context.Products.OrderByDescending(p => p.PublishYear).ToList();
-                        return toProductOutput(products3);
+                        return toProductOutputs(products3);
 
                     default:
                         return null;
@@ -160,15 +121,15 @@ namespace WebAPIBookStore.Repository
                 {
                     case 1:
                         var products1 = _context.Products.OrderBy(p => p.Name).ToList();
-                        return toProductOutput(products1);
+                        return toProductOutputs(products1);
 
                     case 2:
                         var products2 = _context.Products.OrderBy(p => p.Price).ToList();
-                        return toProductOutput(products2);
+                        return toProductOutputs(products2);
 
                     case 3:
                         var products3 = _context.Products.OrderBy(p => p.PublishYear).ToList();
-                        return toProductOutput(products3);
+                        return toProductOutputs(products3);
 
                     default:
                         return null;
@@ -184,15 +145,15 @@ namespace WebAPIBookStore.Repository
                 {
                     case 1:
                         var productByAuthor = _context.Products.Take((int)limit).Where(p => p.Author.Contains(input)).ToList();
-                        return toProductOutput(productByAuthor);
+                        return toProductOutputs(productByAuthor);
 
                     case 2:
                         var productByYear = _context.Products.Take((int)limit).Where(p => p.PublishYear.ToString().Contains(input)).ToList();
-                        return toProductOutput(productByYear);
+                        return toProductOutputs(productByYear);
 
                     default:
                         var productByName = _context.Products.Take((int)limit).Where(p => p.Name.Contains(input)).ToList();
-                        return toProductOutput(productByName);
+                        return toProductOutputs(productByName);
                 }
             }
             else
@@ -201,15 +162,15 @@ namespace WebAPIBookStore.Repository
                 {
                     case 1:
                         var productByAuthor = _context.Products.Where(p => p.Author.Contains(input)).ToList();
-                        return toProductOutput(productByAuthor);
+                        return toProductOutputs(productByAuthor);
 
                     case 2:
                         var productByYear = _context.Products.Where(p => p.PublishYear.ToString().Contains(input)).ToList();
-                        return toProductOutput(productByYear);
+                        return toProductOutputs(productByYear);
 
                     default:
                         var productByName = _context.Products.Where(p => p.Name.Contains(input)).ToList();
-                        return toProductOutput(productByName);
+                        return toProductOutputs(productByName);
                 }
             }
         }
@@ -219,19 +180,9 @@ namespace WebAPIBookStore.Repository
             return _context.Products.FirstOrDefault(p => p.Id == id);
         }
 
-        public ICollection<ProductOutput> toProductOutput(ICollection<Product> products)
+        public ICollection<ProductOutput> toProductOutputs(ICollection<Product> products)
         {
-            return products.Select(p => new ProductOutput
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Author = p.Author,
-                Price = p.Price,
-                PublishYear = p.PublishYear,
-                ImageURL = _context.Images.Where(i => i.ProductId == p.Id).Select(i => i.URL).ToList(),
-                CategoryNames = _context.ProductCategories.Where(pc => pc.ProductId == p.Id).Join(_context.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c.Name).ToList()
-            }).ToList();
+            return products.Select(p => toProductOutput(p)).ToList();
         }
 
         public ProductOutput? toProductOutput(Product? product)
