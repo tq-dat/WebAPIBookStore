@@ -6,7 +6,7 @@ namespace WebAPIBookStore.Input
     {
         public int ByValue { get; set; }
 
-        public bool Descending { get; set; }
+        public bool? OrderDesc { get; set; }
 
         public ICollection<ProductOutput> ProductOutputs { get; set; } = null!;
     }

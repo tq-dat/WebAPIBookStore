@@ -95,7 +95,10 @@ namespace WebAPIBookStore.Repository
 
         public ICollection<ProductOutput>? SortBy(SortInput sortInput)
         {
-            if (sortInput.Descending)
+            if (sortInput.OrderDesc == null)
+                return sortInput.ProductOutputs;
+            
+            if (sortInput.OrderDesc == true)
             {
                 switch (sortInput.ByValue)
                 {
